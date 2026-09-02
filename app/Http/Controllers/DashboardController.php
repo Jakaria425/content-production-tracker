@@ -17,12 +17,12 @@ class DashboardController extends Controller
             ->with(['inviter', 'team'])
             ->whereRaw('LOWER(email) = ?', [$email])
             ->whereNull('accepted_at')
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('expires_at')
                 ->orWhere('expires_at', '>=', now()))
             ->latest()
             ->get()
-            ->map(fn (TeamInvitation $invitation) => [
+            ->map(fn(TeamInvitation $invitation) => [
                 'code' => $invitation->code,
                 'inviterName' => $invitation->inviter->name,
                 'team' => [
@@ -33,6 +33,13 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'pendingInvitations' => $pendingInvitations,
+            'internshipProgress' => [
+                'student' => 'Md. Jakaria Hossain',
+                'project' => 'Content Production Tracker',
+                'currentDay' => 'Day 1',
+                'status' => 'Environment ready',
+                'message' => 'I built and verified this page.',
+            ],
         ]);
     }
 }

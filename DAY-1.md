@@ -16,3 +16,12 @@
 * The .env file has been entered in gitinore file so that .env file can not be tracked by Git.
 * The database migrations finish successfully.
 * type-check is added manually into package.json with the help of ChatGTP. Then run npm run type-check finishes without a TypeScript erro
+
+## Check the authentication flow
+* Register a new user.
+Name: Intern Test
+Email: intern@example.test
+Registration  successful 
+* Login successful.
+* Logout successful.
+* Dashboard is protected for guest and  will be redirected to login page.
