@@ -25,3 +25,6 @@ Registration  successful
 * Login successful.
 * Logout successful.
 * Dashboard is protected for guest and  will be redirected to login page.
+
+## Visible change in dashboard
+* Information added to controller 

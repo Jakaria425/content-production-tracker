@@ -7,7 +7,13 @@ import type { DashboardInvitation, Team } from '@/types';
 
 defineProps<{
     pendingInvitations?: DashboardInvitation[];
-   
+    internshipProgress:{
+        student: string;
+        project: string;
+        currentDay: string;
+        status: string;
+        massage: string;
+    }
 }>();
 
 defineOptions({
@@ -51,7 +57,7 @@ defineOptions({
         <div
             class="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 rounded-xl border md:min-h-min"
         >
-           <h1 class="from-neutral-100 color: bg-r">Md.Jakaria Hossain </h1>
+           <h1 class="from-neutral-100 color: bg-r">{{internshipProgress.student}} </h1>
         </div>
     </div>
 </template>
