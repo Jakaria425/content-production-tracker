@@ -24,7 +24,7 @@ Email: intern@example.test
 Registration  successful 
 * Login successful.
 * Logout successful.
-* Dashboard is protected for guest and  will be redirected to login page.
+* Dashboard is protected from guest and can not be accessed without login.
 
 ## Visible change in dashboard
 * Information added to controller 

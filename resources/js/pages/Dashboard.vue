@@ -7,13 +7,14 @@ import type { DashboardInvitation, Team } from '@/types';
 
 defineProps<{
     pendingInvitations?: DashboardInvitation[];
-    internshipProgress:{
+
+    internshipProgress: {
         student: string;
         project: string;
         currentDay: string;
         status: string;
-        massage: string;
-    }
+        message: string;
+    };
 }>();
 
 defineOptions({
@@ -31,33 +32,34 @@ defineOptions({
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
-    <PendingInvitationsModal
-        v-if="pendingInvitations && pendingInvitations.length > 0"
-        :invitations="pendingInvitations"
-    />
-
-    <div
-        class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
-    >
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div
-                class="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border"
-            >
-                <PlaceholderPattern />
+    <PendingInvitationsModal v-if="pendingInvitations && pendingInvitations.length > 0"
+        :invitations="pendingInvitations" />
+    <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"> <!-- Internship Progress -->
+        <div class="grid auto-rows-min gap-4 md:grid-cols-2">
+            <div class="relative aspect-video p-7 overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+                <h1>Mentor</h1>
+                <p>Nasir Nobin</p>
             </div>
-            <div
-                class="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border"
-            >
-                <PlaceholderPattern />
+            <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+                <h1>Intern</h1>
+                <p>Jakaria Hossain</p>
             </div>
-            
         </div>
-        <div
-            class="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 rounded-xl border md:min-h-min"
-        >
-           <h1 class="from-neutral-100 color: bg-r">{{internshipProgress.student}} </h1>
-        </div>
+        <div class="rounded-xl border p-6">
+            <h1 class="mb-6 text-2xl font-bold"> Internship Progress </h1>
+            <div class="space-y-3">
+                <p> <span class="font-semibold">Student:</span> {{ internshipProgress.student }} </p>
+                <p> <span class="font-semibold">Project:</span> {{ internshipProgress.project }} </p>
+                <p> <span class="font-semibold">Current Day:</span> {{ internshipProgress.currentDay }} </p>
+                <p> <span class="font-semibold">Status:</span> {{ internshipProgress.status }} </p>
+                <p class="pt-3"> {{ internshipProgress.message }} </p>
+            </div>
+        </div> <!-- Existing dashboard placeholders -->
+        
     </div>
+
+
 </template>
