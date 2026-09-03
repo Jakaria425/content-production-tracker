@@ -44,7 +44,7 @@ Each project must contain the following fields:
 - The newest projects appear first.
 - An empty account displays a clear empty state.
 
-## 4. Database relationship
+## 4. Mermaid database diagram
 
 ```mermaid
 erDiagram
@@ -52,27 +52,24 @@ erDiagram
 
     USERS {
         bigint id PK
-        string name
-        string email
-        timestamp email_verified_at
-        string password
-        string remember_token
-        timestamp created_at
-        timestamp updated_at
+        varchar name
+        varchar email
+        
     }
 
     PROJECTS {
         bigint id PK
         bigint user_id FK
-        string title
-        string content_type
-        string status
+        varchar title
+        varchar content_type
+        varchar status
         date due_date
         text brief
         text notes
         timestamp created_at
         timestamp updated_at
     }
+    
 ```
 
 ### Relationship explanation
