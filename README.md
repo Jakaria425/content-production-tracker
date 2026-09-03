@@ -2,20 +2,20 @@
 
 ## Technology Stack
 
-* Laravel
-* Vue.js
-* TypeScript
-* MySQL
+- Laravel
+- Vue.js
+- TypeScript
+- MySQL
 
 ## Requirements
 
 Make sure the following are installed before setting up the project:
 
-* PHP 8.2+
-* Composer
-* Node.js 20+
-* npm
-* MySQL
+- PHP 8.2+
+- Composer
+- Node.js 20+
+- npm
+- MySQL
 
 ## Installation Process
 
