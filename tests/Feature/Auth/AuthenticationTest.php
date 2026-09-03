@@ -98,6 +98,5 @@ test('users are rate limited', function () {
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
-
     $response->assertTooManyRequests();
 });
