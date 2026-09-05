@@ -16,13 +16,12 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('title', 150);
             $table->string('content_type', 50);
-            $table->string('status', 30);
+            $table->string('status');
             $table->date('due_date')->nullable();
             $table->text('brief')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->index('status');
         });
     }
 

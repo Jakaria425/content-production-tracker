@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(php artisan tinker --execute 'dump(phpunit_environment_isset()); ' 2>&1)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
