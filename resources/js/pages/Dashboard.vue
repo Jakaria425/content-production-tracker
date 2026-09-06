@@ -67,6 +67,7 @@ defineOptions({
                     <span class="font-semibold">Project:</span>
                     {{ internshipProgress.project }}
                 </p>
+                <x-layout> </x-layout>
                 <p>
                     <span class="font-semibold">Current Day:</span>
                     {{ internshipProgress.currentDay }}
