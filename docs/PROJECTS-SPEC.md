@@ -75,3 +75,16 @@ erDiagram
 ### Relationship explanation
 
 A **user** owns many projects, while each **project** belongs to exactly one user. Because a project has only one owner, the foreign key `user_id` is stored on the `projects` (many) side of the relationship, pointing back to the `users` (one) side. This is a standard one-to-many relationship: the `user_id` column in the `projects` table is what links every project back to its owner, and retrieving `$user->projects` or `$project->user` relies on that single column.
+
+## Step 5 — The Project model and migration complete.
+* Project table  have all columns an foreign key
+* $user->projects returns the user's projects.
+* $project->user returns the project owner.
+
+## Step 6 — Factory and sample data added.
+* A fresh database can receive all sample data with one seed command.
+* Every sample project has an owner.
+* The seeded projects use valid content types and statuses.
+* No production credential appears in the seeder.
+
+## Step 7 — Protected Projects page added 
