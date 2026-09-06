@@ -32,7 +32,7 @@ Each project must contain the following fields:
 
 - Draft
 - In progress
-- Review
+- Reviewt
 - Complete
 
 ## 3. Business rules

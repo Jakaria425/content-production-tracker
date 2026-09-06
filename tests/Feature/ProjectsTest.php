@@ -92,3 +92,17 @@ test('projects are ordered from newest to oldest', function () {
         ->where('projects.1.id', $old->id),
     );
 });
+
+test('an account without projects sees the empty state', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('projects.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Projects')
+        ->has('projects', 0),
+    );
+});
