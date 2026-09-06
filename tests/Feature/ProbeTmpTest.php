@@ -2,7 +2,7 @@
 
 use App\Models\User;
 
-test('probe environment and csrf', function () {
+test('probe environment and csrf', function (): void {
     dump([
         'env' => app()->environment(),
         'runningUnitTests' => app()->runningUnitTests(),

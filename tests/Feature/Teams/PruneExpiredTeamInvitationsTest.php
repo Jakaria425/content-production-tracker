@@ -5,7 +5,7 @@ use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
 
-test('expired invitations are deleted by the scheduled cleanup', function () {
+test('expired invitations are deleted by the scheduled cleanup', function (): void {
     $this->travelTo(now()->startOfDay());
 
     $owner = User::factory()->create();

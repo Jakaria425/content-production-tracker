@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\File;
 
-test('seeder contains no hardcoded production credentials', function () {
+test('seeder contains no hardcoded production credentials', function (): void {
     $seederPath = database_path('seeders/DatabaseSeeder.php');
     $content = File::get($seederPath);
 

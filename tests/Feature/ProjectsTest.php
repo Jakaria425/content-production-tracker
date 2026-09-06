@@ -4,13 +4,13 @@ use App\Models\Project;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('guests are redirected to the login page', function () {
+test('guests are redirected to the login page', function (): void {
     $response = $this->get(route('projects.index'));
 
     $response->assertRedirect(route('login'));
 });
 
-test('authenticated users can open the projects page', function () {
+test('authenticated users can open the projects page', function (): void {
     $user = User::factory()->create();
 
     $response = $this
@@ -21,7 +21,7 @@ test('authenticated users can open the projects page', function () {
     $response->assertInertia(fn (Assert $page) => $page->component('Projects'));
 });
 
-test('the projects page shows only the authenticated user projects', function () {
+test('the projects page shows only the authenticated user projects', function (): void {
     $user = User::factory()->create();
 
     $projects = Project::factory()->count(3)->for($user)->create();
@@ -43,7 +43,7 @@ test('the projects page shows only the authenticated user projects', function ()
     );
 });
 
-test('the projects page does not expose another user projects', function () {
+test('the projects page does not expose another user projects', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
@@ -67,7 +67,7 @@ test('the projects page does not expose another user projects', function () {
     );
 });
 
-test('projects are ordered from newest to oldest', function () {
+test('projects are ordered from newest to oldest', function (): void {
     $user = User::factory()->create();
 
     $old = Project::factory()->for($user)->create([
@@ -93,7 +93,7 @@ test('projects are ordered from newest to oldest', function () {
     );
 });
 
-test('an account without projects sees the empty state', function () {
+test('an account without projects sees the empty state', function (): void {
     $user = User::factory()->create();
 
     $response = $this
