@@ -1,4 +1,8 @@
-export type ProjectContentType = 'Ebook' | 'Blog post' | 'Newsletter' | 'Social post';
+export type ProjectContentType =
+    | 'Ebook'
+    | 'Blog post'
+    | 'Newsletter'
+    | 'Social post';
 
 export type ProjectStatus = 'Draft' | 'In progress' | 'Review' | 'Complete';
 

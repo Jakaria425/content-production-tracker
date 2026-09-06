@@ -151,12 +151,12 @@ const dashboardUrl = computed(() =>
                         </li>
                     </ul>
                 </div>
-                
+
                 <dev>
                     <img
-                                src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfpaXDhmX79q5uEaQOudFpaK-gHSsAEaOlMSXVcPCnza6EGRKGivYuogAM&s=10'
-                                className=" w-full h-full object-cover "
-                            />
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfpaXDhmX79q5uEaQOudFpaK-gHSsAEaOlMSXVcPCnza6EGRKGivYuogAM&s=10"
+                        className=" w-full h-full object-cover "
+                    />
                 </dev>
             </main>
         </div>

@@ -67,9 +67,7 @@ defineOptions({
                     <span class="font-semibold">Project:</span>
                     {{ internshipProgress.project }}
                 </p>
-                <x-layout>
-                
-            </x-layout>
+                <x-layout> </x-layout>
                 <p>
                     <span class="font-semibold">Current Day:</span>
                     {{ internshipProgress.currentDay }}
@@ -80,7 +78,6 @@ defineOptions({
                 </p>
                 <p class="pt-3">{{ internshipProgress.message }}</p>
             </div>
-            
         </div>
         <!-- Existing dashboard placeholders -->
     </div>

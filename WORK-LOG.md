@@ -17,40 +17,40 @@ then the full suite, then the type-check. Record every command and result.
 
 1. Focused test run
 
-   ```bash
-   php artisan test tests/Feature/ProjectsTest.php --compact
-   ```
+    ```bash
+    php artisan test tests/Feature/ProjectsTest.php --compact
+    ```
 
-   Result: PASSED — 6 tests, 6 passed, 68 assertions.
+    Result: PASSED — 6 tests, 6 passed, 68 assertions.
 
 2. Code style (dirty files only)
 
-   ```bash
-   vendor\bin\pint --dirty --format agent --parallel
-   ```
+    ```bash
+    vendor\bin\pint --dirty --format agent --parallel
+    ```
 
-   Result: PASSED — no files required formatting.
+    Result: PASSED — no files required formatting.
 
 3. Complete test suite
 
-   ```bash
-   php artisan test --compact
-   ```
+    ```bash
+    php artisan test --compact
+    ```
 
-   Result: PASSED — 90 tests, 87 passed, 3 skipped, 1 risky, 323 assertions
-   (the risky/skipped items are the pre-existing `ProbeTmpTest` dump and
-   skipped suites; all Day 1 tests still pass).
+    Result: PASSED — 90 tests, 87 passed, 3 skipped, 1 risky, 323 assertions
+    (the risky/skipped items are the pre-existing `ProbeTmpTest` dump and
+    skipped suites; all Day 1 tests still pass).
 
 4. TypeScript type-check
 
-   ```bash
-   NODE_OPTIONS=--max-old-space-size=4096 npm run type-check
-   ```
+    ```bash
+    NODE_OPTIONS=--max-old-space-size=4096 npm run type-check
+    ```
 
-   Result: PASSED — `vue-tsc --noEmit` exited cleanly with no errors.
-   (The `NODE_OPTIONS` heap bump was required because this machine has a small
-   Windows paging file; earlier un-bumped runs of `vue-tsc` aborted with a
-   JavaScript heap out-of-memory error.)
+    Result: PASSED — `vue-tsc --noEmit` exited cleanly with no errors.
+    (The `NODE_OPTIONS` heap bump was required because this machine has a small
+    Windows paging file; earlier un-bumped runs of `vue-tsc` aborted with a
+    JavaScript heap out-of-memory error.)
 
 ### Summary
 

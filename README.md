@@ -36,16 +36,16 @@ Built on the official Laravel Vue starter kit with teams, authentication, and a 
 
 ## Tech stack
 
-| Layer | Technology |
-| --- | --- |
-| Backend | PHP 8.4+, [Laravel 13](https://laravel.com), Laravel Fortify |
-| Frontend | [Inertia.js v3](https://inertiajs.com), [Vue 3](https://vuejs.org) (`<script setup lang="ts">`), TypeScript |
-| Styling | Tailwind CSS v4, shadcn-style Vue UI components (reka-ui) |
-| Routing helpers | [Laravel Wayfinder](https://github.com/laravel/wayfinder) — typed `@/routes/*` helpers |
-| Bundler | Vite (via [vite-plus](https://www.npmjs.com/package/vite-plus)) |
-| Testing | Pest PHP v5, PHPUnit under the hood |
-| Quality | Laravel Pint, PHPStan (Larastan), Rector |
-| Database | MySQL in dev/production; SQLite for tests |
+| Layer           | Technology                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| Backend         | PHP 8.4+, [Laravel 13](https://laravel.com), Laravel Fortify                                                |
+| Frontend        | [Inertia.js v3](https://inertiajs.com), [Vue 3](https://vuejs.org) (`<script setup lang="ts">`), TypeScript |
+| Styling         | Tailwind CSS v4, shadcn-style Vue UI components (reka-ui)                                                   |
+| Routing helpers | [Laravel Wayfinder](https://github.com/laravel/wayfinder) — typed `@/routes/*` helpers                      |
+| Bundler         | Vite (via [vite-plus](https://www.npmjs.com/package/vite-plus))                                             |
+| Testing         | Pest PHP v5, PHPUnit under the hood                                                                         |
+| Quality         | Laravel Pint, PHPStan (Larastan), Rector                                                                    |
+| Database        | MySQL in dev/production; SQLite for tests                                                                   |
 
 ---
 
@@ -113,8 +113,8 @@ This creates **one demo user** and **10 content projects** owned by that user (v
 
 After `php artisan db:seed`, sign in at <http://localhost:8000/login> with:
 
-| Email | Password |
-| --- | --- |
+| Email                 | Password   |
+| --------------------- | ---------- |
 | `intern@example.test` | `password` |
 
 Both values come from the `SEEDER_USER_EMAIL` and `SEEDER_USER_PASSWORD` environment variables, so they can be changed without touching source code.
@@ -123,24 +123,24 @@ Both values come from the `SEEDER_USER_EMAIL` and `SEEDER_USER_PASSWORD` environ
 
 ## Available commands
 
-| Command | Purpose |
-| --- | --- |
-| `composer run dev` | Start server, queue worker, and Vite dev server together |
-| `php artisan serve` | Start only the HTTP server |
-| `npm run dev` | Run the Vite dev server (hot reload) |
-| `npm run build` | Production build (also regenerates Wayfinder route helpers + Vite manifest) |
-| `npm run build:ssr` | Build plus SSR bundle |
-| `php artisan test` | Run the full test suite |
-| `vendor\bin\pest` | Run Pest directly (Windows) |
-| `vendor\bin\pint` | Fix PHP code style |
-| `vendor\bin\pint --test` | Check code style without modifying (`npm run lint:check`) |
-| `php artisan db:seed` | Seed the database with demo user + projects |
-| `npm run types:check` | TypeScript type-check via `vue-tsc` |
-| `npm run check` | Frontend lint/format check (eslint-style) |
-| `npm run check:fix` | Auto-fix frontend lint/format issues |
-| `composer run types:check` | PHPStan static analysis |
-| `composer run format` | Rector + Pint |
-| `composer run ci:check` | Full CI pipeline: frontend check → types → test |
+| Command                    | Purpose                                                                     |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `composer run dev`         | Start server, queue worker, and Vite dev server together                    |
+| `php artisan serve`        | Start only the HTTP server                                                  |
+| `npm run dev`              | Run the Vite dev server (hot reload)                                        |
+| `npm run build`            | Production build (also regenerates Wayfinder route helpers + Vite manifest) |
+| `npm run build:ssr`        | Build plus SSR bundle                                                       |
+| `php artisan test`         | Run the full test suite                                                     |
+| `vendor\bin\pest`          | Run Pest directly (Windows)                                                 |
+| `vendor\bin\pint`          | Fix PHP code style                                                          |
+| `vendor\bin\pint --test`   | Check code style without modifying (`npm run lint:check`)                   |
+| `php artisan db:seed`      | Seed the database with demo user + projects                                 |
+| `npm run types:check`      | TypeScript type-check via `vue-tsc`                                         |
+| `npm run check`            | Frontend lint/format check (eslint-style)                                   |
+| `npm run check:fix`        | Auto-fix frontend lint/format issues                                        |
+| `composer run types:check` | PHPStan static analysis                                                     |
+| `composer run format`      | Rector + Pint                                                               |
+| `composer run ci:check`    | Full CI pipeline: frontend check → types → test                             |
 
 > **Note:** after changing a Laravel route, run `npm run build` (or `npm run dev`) so Wayfinder regenerates the typed route helpers under `resources/js/routes`.
 
@@ -188,14 +188,14 @@ tests/
 
 ## Routes and pages
 
-| Route | Visibility | Page |
-| --- | --- | --- |
-| `/` | Public | Welcome |
-| `/login`, `/register`, `/forgot-password` | Guest only | auth pages |
-| `/projects` | Authenticated | **Projects** |
-| `/{team}/dashboard` | Team member | Dashboard |
-| `/settings/profile`, `/settings/security`, `/settings/appearance` | Authenticated | Settings |
-| `/settings/teams` | Authenticated | Teams |
+| Route                                                             | Visibility    | Page         |
+| ----------------------------------------------------------------- | ------------- | ------------ |
+| `/`                                                               | Public        | Welcome      |
+| `/login`, `/register`, `/forgot-password`                         | Guest only    | auth pages   |
+| `/projects`                                                       | Authenticated | **Projects** |
+| `/{team}/dashboard`                                               | Team member   | Dashboard    |
+| `/settings/profile`, `/settings/security`, `/settings/appearance` | Authenticated | Settings     |
+| `/settings/teams`                                                 | Authenticated | Teams        |
 
 When signed in, the sidebar navigation ("Platform") links to **Dashboard** and **Projects**.
 
@@ -217,17 +217,17 @@ When signed in, the sidebar navigation ("Platform") links to **Dashboard** and *
 
 Copy `.env.example` to `.env` and adjust. Key variables:
 
-| Variable | Purpose | Default |
-| --- | --- | --- |
-| `APP_NAME`, `APP_ENV`, `APP_URL` | Application identity and environment | `Laravel`, `local`, `http://localhost:8000` |
-| `APP_DEBUG` | Detailed debug output | `true` |
-| `APP_KEY` | Encryption key (generate with `php artisan key:generate`) | — |
-| `DB_*` | Database connection | MySQL defaults |
-| `SESSION_DRIVER`, `CACHE_STORE`, `QUEUE_CONNECTION` | Drivers | `database` |
-| `MAIL_*` | Mail configuration | `log` mailer |
-| `SEEDER_USER_NAME` | Name of the seeded demo user | `Intern Test` |
-| `SEEDER_USER_EMAIL` | Email of the seeded demo user | `intern@example.test` |
-| `SEEDER_USER_PASSWORD` | Password of the seeded demo user | `password` |
+| Variable                                            | Purpose                                                   | Default                                     |
+| --------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------- |
+| `APP_NAME`, `APP_ENV`, `APP_URL`                    | Application identity and environment                      | `Laravel`, `local`, `http://localhost:8000` |
+| `APP_DEBUG`                                         | Detailed debug output                                     | `true`                                      |
+| `APP_KEY`                                           | Encryption key (generate with `php artisan key:generate`) | —                                           |
+| `DB_*`                                              | Database connection                                       | MySQL defaults                              |
+| `SESSION_DRIVER`, `CACHE_STORE`, `QUEUE_CONNECTION` | Drivers                                                   | `database`                                  |
+| `MAIL_*`                                            | Mail configuration                                        | `log` mailer                                |
+| `SEEDER_USER_NAME`                                  | Name of the seeded demo user                              | `Intern Test`                               |
+| `SEEDER_USER_EMAIL`                                 | Email of the seeded demo user                             | `intern@example.test`                       |
+| `SEEDER_USER_PASSWORD`                              | Password of the seeded demo user                          | `password`                                  |
 
 > **Security:** seeded credentials come from environment variables, never hardcoded. The `.test` TLD default is reserved and non-routable, so no production-credential can be committed. A unit test (`tests/Unit/SeederCredentialTest`) enforces this.
 
@@ -268,18 +268,18 @@ Feature tests cover guests being redirected to login, authenticated access, user
 
 ### 1. Project model fields
 
-| Field | Requirement |
-| --- | --- |
-| `id` | Primary key |
-| `user_id` | Owner of the project |
-| `title` | Required, maximum 150 characters |
-| `content_type` | Required string, maximum 50 characters |
-| `status` | Required string, maximum 30 characters |
-| `due_date` | Optional date |
-| `brief` | Optional text containing the user's content instructions |
-| `notes` | Optional text |
-| `created_at` | Creation time |
-| `updated_at` | Last update time |
+| Field          | Requirement                                              |
+| -------------- | -------------------------------------------------------- |
+| `id`           | Primary key                                              |
+| `user_id`      | Owner of the project                                     |
+| `title`        | Required, maximum 150 characters                         |
+| `content_type` | Required string, maximum 50 characters                   |
+| `status`       | Required string, maximum 30 characters                   |
+| `due_date`     | Optional date                                            |
+| `brief`        | Optional text containing the user's content instructions |
+| `notes`        | Optional text                                            |
+| `created_at`   | Creation time                                            |
+| `updated_at`   | Last update time                                         |
 
 ### 2. Allowed values (first version)
 

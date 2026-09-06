@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Test Documentation</title>
         <style>
             :root {
@@ -13,19 +13,30 @@
                 --border: light-dark(#e2e4e8, #30343c);
                 --text: light-dark(#1a1a1a, #e6e8eb);
                 --muted: light-dark(#6b7280, #9aa1ab);
-                --shadow: light-dark(0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.4));
+                --shadow: light-dark(
+                    0 1px 3px rgba(0, 0, 0, 0.08),
+                    0 1px 3px rgba(0, 0, 0, 0.4)
+                );
 
                 --passed-background: light-dark(#d6e6f2, #1e3550);
                 --failed-background: light-dark(#fad4c0, #4a2a10);
             }
 
-            *, *::before, *::after {
+            *,
+            *::before,
+            *::after {
                 box-sizing: border-box;
             }
 
             body {
                 text-rendering: optimizeLegibility;
-                font-family: Source SansSerif Pro, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+                font-family:
+                    Source SansSerif Pro,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    'Segoe UI',
+                    Arial,
+                    sans-serif;
                 font-variant-ligatures: common-ligatures;
                 font-kerning: normal;
                 line-height: 1.5;
@@ -128,199 +139,368 @@
     <body>
         <header class="summary">
             <h1>Test Documentation</h1>
-            <p class="counts"><span class="passed">86 passed</span> · <span class="failed">4 failed</span></p>
+            <p class="counts">
+                <span class="passed">86 passed</span> ·
+                <span class="failed">4 failed</span>
+            </p>
         </header>
         <main>
-
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Auth\AuthenticationTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Auth\AuthenticationTest.php
+                </h2>
                 <ul>
                     <li class="success">login screen can be rendered</li>
-                    <li class="success">login screen includes team invitation context</li>
-                    <li class="success">users can authenticate using the login screen</li>
-                    <li class="defect">users with two factor enabled are redirected to two factor challenge</li>
-                    <li class="success">users can not authenticate with invalid password</li>
+                    <li class="success">
+                        login screen includes team invitation context
+                    </li>
+                    <li class="success">
+                        users can authenticate using the login screen
+                    </li>
+                    <li class="defect">
+                        users with two factor enabled are redirected to two
+                        factor challenge
+                    </li>
+                    <li class="success">
+                        users can not authenticate with invalid password
+                    </li>
                     <li class="success">users can logout</li>
                     <li class="success">users are rate limited</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Auth\PasswordResetTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Auth\PasswordResetTest.php
+                </h2>
                 <ul>
-                    <li class="success">reset password link screen can be rendered</li>
-                    <li class="success">reset password link can be requested</li>
-                    <li class="success">reset password screen can be rendered</li>
-                    <li class="success">password can be reset with valid token</li>
-                    <li class="success">password cannot be reset with invalid token</li>
+                    <li class="success">
+                        reset password link screen can be rendered
+                    </li>
+                    <li class="success">
+                        reset password link can be requested
+                    </li>
+                    <li class="success">
+                        reset password screen can be rendered
+                    </li>
+                    <li class="success">
+                        password can be reset with valid token
+                    </li>
+                    <li class="success">
+                        password cannot be reset with invalid token
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Auth\RegistrationTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Auth\RegistrationTest.php
+                </h2>
                 <ul>
                     <li class="success">registration screen can be rendered</li>
-                    <li class="success">registration screen includes team invitation context</li>
+                    <li class="success">
+                        registration screen includes team invitation context
+                    </li>
                     <li class="success">new users can register</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\DashboardTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\DashboardTest.php
+                </h2>
                 <ul>
-                    <li class="success">guests are redirected to the login page</li>
-                    <li class="success">authenticated users can visit the dashboard</li>
-                    <li class="success">dashboard includes pending invitations for the authenticated user</li>
-                    <li class="success">dashboard does not include accepted invitations</li>
-                    <li class="success">dashboard excludes expired invitations without deleting them</li>
-                    <li class="success">dashboard does not include or delete other users invitations</li>
+                    <li class="success">
+                        guests are redirected to the login page
+                    </li>
+                    <li class="success">
+                        authenticated users can visit the dashboard
+                    </li>
+                    <li class="success">
+                        dashboard includes pending invitations for the
+                        authenticated user
+                    </li>
+                    <li class="success">
+                        dashboard does not include accepted invitations
+                    </li>
+                    <li class="success">
+                        dashboard excludes expired invitations without deleting
+                        them
+                    </li>
+                    <li class="success">
+                        dashboard does not include or delete other users
+                        invitations
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\ExampleTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\ExampleTest.php
+                </h2>
                 <ul>
                     <li class="success">returns a successful response</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\ProbeTmpTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\ProbeTmpTest.php
+                </h2>
                 <ul>
                     <li class="defect">probe environment and csrf</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\ProjectsTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\ProjectsTest.php
+                </h2>
                 <ul>
-                    <li class="success">guests are redirected to the login page</li>
-                    <li class="success">authenticated users can open the projects page</li>
-                    <li class="success">the projects page shows only the authenticated user projects</li>
-                    <li class="success">the projects page does not expose another user projects</li>
-                    <li class="success">projects are ordered from newest to oldest</li>
-                    <li class="success">an account without projects sees the empty state</li>
+                    <li class="success">
+                        guests are redirected to the login page
+                    </li>
+                    <li class="success">
+                        authenticated users can open the projects page
+                    </li>
+                    <li class="success">
+                        the projects page shows only the authenticated user
+                        projects
+                    </li>
+                    <li class="success">
+                        the projects page does not expose another user projects
+                    </li>
+                    <li class="success">
+                        projects are ordered from newest to oldest
+                    </li>
+                    <li class="success">
+                        an account without projects sees the empty state
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Settings\ProfileUpdateTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Settings\ProfileUpdateTest.php
+                </h2>
                 <ul>
                     <li class="success">profile page is displayed</li>
                     <li class="success">profile information can be updated</li>
-                    <li class="success">email verification status is unchanged when the email address is unchanged</li>
+                    <li class="success">
+                        email verification status is unchanged when the email
+                        address is unchanged
+                    </li>
                     <li class="success">user can delete their account</li>
-                    <li class="success">correct password must be provided to delete account</li>
+                    <li class="success">
+                        correct password must be provided to delete account
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Settings\SecurityTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Settings\SecurityTest.php
+                </h2>
                 <ul>
                     <li class="defect">security page is displayed</li>
-                    <li class="defect">security page renders without two factor when feature is disabled</li>
+                    <li class="defect">
+                        security page renders without two factor when feature is
+                        disabled
+                    </li>
                     <li class="success">password can be updated</li>
-                    <li class="success">correct password must be provided to update password</li>
+                    <li class="success">
+                        correct password must be provided to update password
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Teams\PruneExpiredTeamInvitationsTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Teams\PruneExpiredTeamInvitationsTest.php
+                </h2>
                 <ul>
-                    <li class="success">expired invitations are deleted by the scheduled cleanup</li>
+                    <li class="success">
+                        expired invitations are deleted by the scheduled cleanup
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Teams\TeamInvitationTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Teams\TeamInvitationTest.php
+                </h2>
                 <ul>
                     <li class="success">team invitations can be created</li>
-                    <li class="success">invitation email for existing users uses login route</li>
-                    <li class="success">invitation email for unknown users uses login route</li>
-                    <li class="success">team invitations can be created by admins</li>
-                    <li class="success">existing team members cannot be invited</li>
-                    <li class="success">duplicate invitations cannot be created</li>
-                    <li class="success">team invitations cannot be created by members</li>
-                    <li class="success">team invitations can be cancelled by owners</li>
+                    <li class="success">
+                        invitation email for existing users uses login route
+                    </li>
+                    <li class="success">
+                        invitation email for unknown users uses login route
+                    </li>
+                    <li class="success">
+                        team invitations can be created by admins
+                    </li>
+                    <li class="success">
+                        existing team members cannot be invited
+                    </li>
+                    <li class="success">
+                        duplicate invitations cannot be created
+                    </li>
+                    <li class="success">
+                        team invitations cannot be created by members
+                    </li>
+                    <li class="success">
+                        team invitations can be cancelled by owners
+                    </li>
                     <li class="success">team invitations can be accepted</li>
-                    <li class="success">team invitations can be declined by the invited user</li>
-                    <li class="success">team invitations cannot be declined by uninvited user</li>
-                    <li class="success">accepted team invitations cannot be declined</li>
-                    <li class="success">team invitations cannot be accepted by uninvited user</li>
-                    <li class="success">expired invitations cannot be accepted</li>
+                    <li class="success">
+                        team invitations can be declined by the invited user
+                    </li>
+                    <li class="success">
+                        team invitations cannot be declined by uninvited user
+                    </li>
+                    <li class="success">
+                        accepted team invitations cannot be declined
+                    </li>
+                    <li class="success">
+                        team invitations cannot be accepted by uninvited user
+                    </li>
+                    <li class="success">
+                        expired invitations cannot be accepted
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Teams\TeamMemberTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Teams\TeamMemberTest.php
+                </h2>
                 <ul>
-                    <li class="success">team member roles can be updated by owners</li>
-                    <li class="success">team member roles cannot be updated by non owners</li>
-                    <li class="success">team members can be removed by owners</li>
-                    <li class="success">team members cannot be removed by non owners</li>
+                    <li class="success">
+                        team member roles can be updated by owners
+                    </li>
+                    <li class="success">
+                        team member roles cannot be updated by non owners
+                    </li>
+                    <li class="success">
+                        team members can be removed by owners
+                    </li>
+                    <li class="success">
+                        team members cannot be removed by non owners
+                    </li>
                     <li class="success">team owner cannot be removed</li>
-                    <li class="success">team member role cannot be set to owner</li>
-                    <li class="success">removed member current team is set to personal team</li>
+                    <li class="success">
+                        team member role cannot be set to owner
+                    </li>
+                    <li class="success">
+                        removed member current team is set to personal team
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Feature\Teams\TeamTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Feature\Teams\TeamTest.php
+                </h2>
                 <ul>
-                    <li class="success">the teams index page can be rendered</li>
+                    <li class="success">
+                        the teams index page can be rendered
+                    </li>
                     <li class="success">teams can be created</li>
-                    <li class="success">personal team returns the team owned by the user</li>
-                    <li class="success">team slug uses next available suffix</li>
+                    <li class="success">
+                        personal team returns the team owned by the user
+                    </li>
+                    <li class="success">
+                        team slug uses next available suffix
+                    </li>
                     <li class="success">the team edit page can be rendered</li>
                     <li class="success">teams can be updated by owners</li>
                     <li class="success">teams cannot be updated by members</li>
                     <li class="success">teams can be deleted by owners</li>
-                    <li class="success">team deletion requires name confirmation</li>
-                    <li class="success">deleting current team switches to alphabetically first remaining team</li>
-                    <li class="success">deleting current team falls back to personal team when alphabetically first</li>
-                    <li class="success">deleting non current team leaves current team unchanged</li>
-                    <li class="success">members can leave non personal teams</li>
-                    <li class="success">leaving current team switches to alphabetically first remaining team</li>
+                    <li class="success">
+                        team deletion requires name confirmation
+                    </li>
+                    <li class="success">
+                        deleting current team switches to alphabetically first
+                        remaining team
+                    </li>
+                    <li class="success">
+                        deleting current team falls back to personal team when
+                        alphabetically first
+                    </li>
+                    <li class="success">
+                        deleting non current team leaves current team unchanged
+                    </li>
+                    <li class="success">
+                        members can leave non personal teams
+                    </li>
+                    <li class="success">
+                        leaving current team switches to alphabetically first
+                        remaining team
+                    </li>
                     <li class="success">personal teams cannot be left</li>
                     <li class="success">team owners cannot leave their team</li>
-                    <li class="success">users cannot leave teams they dont belong to</li>
-                    <li class="success">deleting team switches other affected users to their personal team</li>
+                    <li class="success">
+                        users cannot leave teams they dont belong to
+                    </li>
+                    <li class="success">
+                        deleting team switches other affected users to their
+                        personal team
+                    </li>
                     <li class="success">personal teams cannot be deleted</li>
-                    <li class="success">teams cannot be deleted by non owners</li>
+                    <li class="success">
+                        teams cannot be deleted by non owners
+                    </li>
                     <li class="success">users can switch teams</li>
-                    <li class="success">users cannot switch to team they dont belong to</li>
+                    <li class="success">
+                        users cannot switch to team they dont belong to
+                    </li>
                     <li class="success">guests cannot access teams</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Unit\ExampleTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Unit\ExampleTest.php
+                </h2>
                 <ul>
                     <li class="success">that true is true</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Unit\inturnshipprocressTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Unit\inturnshipprocressTest.php
+                </h2>
                 <ul>
                     <li class="success">example</li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Unit\ProjectTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Unit\ProjectTest.php
+                </h2>
                 <ul>
                     <li class="success">Project test</li>
-                    <li class="success">factory produces valid content types</li>
+                    <li class="success">
+                        factory produces valid content types
+                    </li>
                     <li class="success">factory produces valid statuses</li>
-                    <li class="success">factory produces projects with enum-casted attributes</li>
+                    <li class="success">
+                        factory produces projects with enum-casted attributes
+                    </li>
                 </ul>
             </section>
 
             <section class="test-class">
-                <h2>D:\inturnship\content-production-tracker\tests\Unit\SeederCredentialTest.php</h2>
+                <h2>
+                    D:\inturnship\content-production-tracker\tests\Unit\SeederCredentialTest.php
+                </h2>
                 <ul>
-                    <li class="success">seeder contains no hardcoded production credentials</li>
+                    <li class="success">
+                        seeder contains no hardcoded production credentials
+                    </li>
                 </ul>
             </section>
         </main>
