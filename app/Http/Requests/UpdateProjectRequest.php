@@ -13,6 +13,9 @@ class UpdateProjectRequest extends FormRequest
         return false;
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     public function rules(): array
     {
         return [

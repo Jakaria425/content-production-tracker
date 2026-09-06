@@ -20,9 +20,9 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $user = User::factory()->create([
-            'name' => env('SEEDER_USER_NAME'),
-            'email' => env('SEEDER_USER_EMAIL'),
-            'password' => Hash::make(env('SEEDER_USER_PASSWORD')),
+            'name' => config('seeder.user.name'),
+            'email' => config('seeder.user.email'),
+            'password' => Hash::make((string) config('seeder.user.password')),
         ]);
 
         Project::factory()
