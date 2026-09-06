@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\ProjectContentType;
+use App\Enums\ProjectStatus;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -18,14 +20,11 @@ class ProjectFactory extends Factory
      */
     public function definition(): array
     {
-        $contentTypes = ['Ebook', 'Blog post', 'Newsletter', 'Social post'];
-        $statuses = ['Draft', 'In progress', 'Review', 'Complete'];
-
         return [
             'user_id' => User::factory(),
             'title' => fake()->sentence(4),
-            'content_type' => fake()->randomElement($contentTypes),
-            'status' => fake()->randomElement($statuses),
+            'content_type' => fake()->randomElement(ProjectContentType::values()),
+            'status' => fake()->randomElement(ProjectStatus::values()),
             'due_date' => fake()->optional()->date(),
             'brief' => fake()->optional()->paragraph(),
             'notes' => fake()->optional()->paragraph(),

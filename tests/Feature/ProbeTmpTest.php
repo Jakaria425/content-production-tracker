@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Models\Team;
 
 test('probe environment and csrf', function () {
     dump([
