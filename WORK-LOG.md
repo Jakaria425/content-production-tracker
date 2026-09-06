@@ -67,14 +67,14 @@ Task: resolve the 8 `phpstan analyse` (level 7, larastan) errors reported by
 
 ### Changes made
 
-| Type   | File                                              | Detail                                                          |
-|--------|---------------------------------------------------|-----------------------------------------------------------------|
-| CREATE | `config/seeder.php`                               | Moved the 3 `env()` calls for the demo user here (where `env()` belongs) with safe `.test` demo defaults |
-| EDIT   | `database/seeders/DatabaseSeeder.php`             | Replaced `env(...)` with `config('seeder.user.*')`; `Hash::make((string) config(...))` |
-| EDIT   | `tests/Unit/SeederCredentialTest.php`             | Repointed assertions: config file must `env()` name/email/password, seeder must read via `config()` (same security intent: no hardcoded credential); 6 assertions now |
-| EDIT   | `app/Http/Requests/StoreProjectRequest.php`       | Added `@return array<string, list<string>>` above `rules()` |
-| EDIT   | `app/Http/Requests/UpdateProjectRequest.php`      | Added `@return array<string, list<string>>` above `rules()` |
-| EDIT   | `app/Models/Project.php`                          | Added `/** @use HasFactory<ProjectFactory> */` + import; `@return BelongsTo<User, $this>` on `user()` (mirrors `User` model pattern) |
+| Type   | File                                         | Detail                                                                                                                                                                |
+| ------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CREATE | `config/seeder.php`                          | Moved the 3 `env()` calls for the demo user here (where `env()` belongs) with safe `.test` demo defaults                                                              |
+| EDIT   | `database/seeders/DatabaseSeeder.php`        | Replaced `env(...)` with `config('seeder.user.*')`; `Hash::make((string) config(...))`                                                                                |
+| EDIT   | `tests/Unit/SeederCredentialTest.php`        | Repointed assertions: config file must `env()` name/email/password, seeder must read via `config()` (same security intent: no hardcoded credential); 6 assertions now |
+| EDIT   | `app/Http/Requests/StoreProjectRequest.php`  | Added `@return array<string, list<string>>` above `rules()`                                                                                                           |
+| EDIT   | `app/Http/Requests/UpdateProjectRequest.php` | Added `@return array<string, list<string>>` above `rules()`                                                                                                           |
+| EDIT   | `app/Models/Project.php`                     | Added `/** @use HasFactory<ProjectFactory> */` + import; `@return BelongsTo<User, $this>` on `user()` (mirrors `User` model pattern)                                  |
 
 No files were deleted.
 
