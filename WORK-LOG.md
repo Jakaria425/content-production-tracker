@@ -174,8 +174,128 @@ cd content-production-tracker
 git checkout -b feature
 git push origin feature
 
-* Setup commands 
+* Setup commands
 composer install
 npm install
 copy .env.example .env  [// configure database ]
 php artisan key:generate
+
+
+## 2026-09-07 — Day 3 Step 4: OpenAI safe configuration
+
+Task: add OPENAI_API_KEY and OPENAI_MODEL to .env.example and config/services.php.
+Application code must use config(), never env().
+
+### Changes made
+
+| Type | File | Detail |
+|---|---|---|
+| EDIT | `.env.example` | Added `# AI api credentials` section with empty OPENAI_API_KEY= and OPENAI_MODEL= placeholders |
+| EDIT | `config/services.php` | Added `openai` block: `api_key` and `model` via env(), fixed `timeout` of 30 seconds |
+| CREATE | `tests/Unit/OpenAIConfigTest.php` | Verifies .env.example has correct names and no real key; config reads via env(); future service uses config() not env() |
+
+### Commands and results
+
+1. OpenAI config unit tests
+
+    ```bash
+    php artisan test tests/Unit/OpenAIConfigTest.php --compact
+    ```
+
+    Result: 2 passed, 1 skipped (service not created yet), 5 assertions.
+
+2. Code style
+
+    ```bash
+    vendor\bin\pint --dirty --format agent
+    ```
+
+    Result: PASSED.
+
+3. Complete test suite
+
+    ```bash
+    php artisan test --compact
+    ```
+
+    Result: 93 tests, 89 passed, 4 skipped, 1 risky (baseline unchanged).
+
+### Summary
+
+- OPENAI_API_KEY and OPENAI_MODEL are empty placeholders in .env.example.
+- Real key lives only in untracked .env.
+- config/services.php reads via env() as required.
+- Third test skips until OpenAIService is created.
+
+
+## 2026-09-07 — Day 3 Step 5: ContentGeneration model, migration, factory
+
+Task: create the content_generations table and model.
+
+### Changes made
+
+| Type | File | Detail |
+|---|---|---|
+| CREATE | `database/migrations/2026_09_07_..._create_content_generations_table.php` | FK to project_id with cascade delete, status, prompt, response (JSON), model, input_tokens, output_tokens, error_code, timestamps |
+| CREATE | `app/Models/ContentGeneration.php` | $fillable, response cast to array, belongsTo(Project) |
+| CREATE | `database/factories/ContentGenerationFactory.php` | Default completed state with fake structured response; failed() state for testing |
+| EDIT | `app/Models/Project.php` | Added contentGenerations() hasMany relationship |
+
+Note: migration failed on first run because old table existed from a previous session. Dropped it manually:
+
+```bash
+php artisan tinker --execute "Illuminate\Support\Facades\DB::statement('DROP TABLE IF EXISTS content_generations');"
+```
+
+Then `php artisan migrate` succeeded.
+
+### Commands and results
+
+```bash
+vendor\bin\pint --dirty --format agent
+php artisan test --compact
+```
+
+Result: 90 tests, 87 passed, 3 skipped, 1 risky.
+
+
+## 2026-09-07 — Day 3 Step 6: OpenAI service
+
+Task: build app/Services/OpenAIService.php — one class, return-based errors.
+
+### Design decisions
+
+- Return-based (not throw) so exactly ONE file is needed, no exception class.
+- All error codes are safe strings: missing_configuration, provider_error, invalid_response.
+- Prompt and response parsing are private methods — never in a controller.
+- Config checked FIRST before any network call.
+- ConnectionException, non-2xx, missing/invalid JSON, and schema validation failures all return controlled errors.
+- Token usage extracted from usage.input_tokens / usage.output_tokens.
+
+### Changes made
+
+| Type | File | Detail |
+|---|---|---|
+| CREATE | `app/Services/OpenAIService.php` | generate(Project), buildPrompt(Project), schema(), validateResponse(array) |
+
+### Commands and results
+
+```bash
+vendor\bin\pint --dirty --format agent
+php artisan test tests/Unit/OpenAIConfigTest.php --compact
+```
+
+Result: 3 passed, 9 assertions (all three tests now run — service exists and uses config()).
+
+```bash
+php artisan test --compact
+```
+
+Result: 93 tests, 90 passed, 3 skipped, 1 risky.
+
+### Summary
+
+The service satisfies every requirement from Step 6 with no extensions:
+- Receives Project, builds prompt from allowed fields, calls Responses API with JSON schema,
+- Validates every required field and nested item, extracts tokens, returns a clearly defined array.
+- No retries, no queues, no streaming, no extra files.
