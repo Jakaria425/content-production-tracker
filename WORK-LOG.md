@@ -128,3 +128,23 @@ No files were deleted.
 - All tests pass, including the updated credential-safety test.
 - No `.env`/`.env.example` changes needed; the demo defaults remain the
   IANA-reserved `.test` domain values.
+
+
+
+
+
+### ---------DAY-3-------
+
+Start time  09:30 - 09/07/2026
+
+* Starting branch and commit
+git clone https://github.com/Jakaria425/content-production-tracker.git
+cd content-production-tracker
+git checkout -b feature
+git push origin feature
+
+* Setup commands 
+composer install
+npm install
+copy .env.example .env  [// configure database ]
+php artisan key:generate
