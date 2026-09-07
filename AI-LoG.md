@@ -95,5 +95,92 @@ Set as the default in `.env.example` as an empty placeholder. User confirmed the
 
 Left `OPENAI_MODEL=` empty in `.env.example` as a placeholder. User will set their own value or use `gpt-4o-mini` during manual testing.
 
+---
+
+## Entry 5 — Failure flash message: one generic sentence vs per-error-code messages
+
+### Task
+
+Decide what the user sees when generation fails. Three distinct internal codes
+exist (`missing_configuration`, `provider_error`, `invalid_response`), so the
+question was whether to show three different messages.
+
+### Suggested Solution
+
+The AI first proposed differentiating the messages per error code with a
+`match ($result['error_code'])` expression.
+
+### My Verification
+
+I wrote out the three branches and noticed that, to keep every message safe,
+all three collapsed to the same sentence anyway. Any attempt to make them
+genuinely different ("OpenAI returned an invalid response", "the provider timed
+out") starts describing server internals to end users, which the assignment
+explicitly forbids.
+
+I also checked where the diagnostic detail actually needs to live: it is already
+persisted in `content_generations.error_code`, which is inspectable by me and my
+mentor without ever reaching the browser.
+
+### My Changes
+
+Rejected the per-code `match`. Chose a single class constant:
+
+```php
+private const SAFE_FAILURE_MESSAGE = 'The content plan could not be generated. Please try again later.';
+```
+
+Both failure paths (invalid project input, and service returning `failed`) go
+through one private `failWithoutGeneration()` helper, so the string is defined
+once and cannot drift between call sites.
+
+### Why the final approach is safer or clearer
+
+One fixed string has zero leak risk regardless of which failure path ran, and
+the user's action is identical in every case — wait and retry. Differentiating
+would add code without adding value on Day 3. It becomes worth revisiting when
+retries or background jobs exist and the message can promise real behaviour
+("we will retry automatically").
+
+---
+
+## Entry 6 — `Inertia::flash()` instead of `->with()` for the toast
+
+### Task
+
+Show the success/failure message after redirecting back to the Projects page.
+
+### Suggested Solution
+
+The AI initially wrote `return back()->with('error', '...')` and
+`->with('success', '...')`, the common Laravel session-flash pattern.
+
+### My Verification
+
+I checked how this application actually surfaces messages:
+
+- `resources/js/lib/flashToast.ts` listens for the Inertia `flash` event and
+  reads `flash.toast` as `{ type, message }`.
+- Every existing controller (`TeamInvitationController`, `TeamController`,
+  `ProfileController`, `SecurityController`) uses
+  `Inertia::flash('toast', ['type' => 'success', 'message' => ...])`.
+- Existing feature tests assert with `assertInertiaFlash('toast', [...])`.
+
+A plain `->with('error', ...)` would have put the message in the session where
+nothing reads it — the user would see no feedback at all, and the Step 9 tests
+would have no consistent assertion helper to use.
+
+### My Changes
+
+Replaced both `->with()` calls with `Inertia::flash('toast', [...])`, using
+`type => 'error'` for failures and `type => 'success'` for the completed
+generation, matching the existing controllers exactly.
+
+### Why the final approach is safer or clearer
+
+It follows the established project convention instead of inventing a second
+messaging channel, so the toast actually renders and the tests can assert
+against the same shape the rest of the suite uses.
+
 
 

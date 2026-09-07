@@ -299,3 +299,76 @@ The service satisfies every requirement from Step 6 with no extensions:
 - Receives Project, builds prompt from allowed fields, calls Responses API with JSON schema,
 - Validates every required field and nested item, extracts tokens, returns a clearly defined array.
 - No retries, no queues, no streaming, no extra files.
+
+
+## 2026-09-07 — Day 3 Step 7: Generation endpoint and authorization
+
+Task: add an authenticated POST route that generates a plan for a project the
+user owns, saves one ContentGeneration record, and flashes a safe message.
+
+### Design decisions
+
+- **One generic failure message for every failure path** (Option A). The
+  sentence `The content plan could not be generated. Please try again later.`
+  is stored once in a class constant `SAFE_FAILURE_MESSAGE` and reused by both
+  the invalid-input guard and the service-failure path through a private
+  `failWithoutGeneration()` helper. Per-error-code messages were rejected: to
+  stay safe they all collapse to the same sentence anyway, and differentiating
+  them starts describing internals to end users. The real diagnostic detail
+  lives in `content_generations.error_code`, not in the browser.
+- **`Inertia::flash('toast', ...)` instead of `->with(...)`** so the message
+  reaches the app's existing toast system (`resources/js/lib/flashToast.ts`).
+- **Ownership checked against the database**, never a browser-sent `user_id`:
+  `$request->user()->id !== $project->user_id` → `abort(403)`.
+- **Input gate runs before the service call**, so an empty title/content_type/
+  brief spends no API credit and writes no record.
+
+### Changes made
+
+| Type | File | Detail |
+|---|---|---|
+| CREATE | `app/Http/Controllers/ProjectContentPlanController.php` | `store(Request, Project)` — ownership check, input gate, `OpenAIService` via constructor injection, single `ContentGeneration::create()`, safe flash, `back()` |
+| EDIT | `routes/web.php` | Added `POST projects/{project}/generations` → `projects.generations.store` inside the existing `auth` middleware group |
+
+### Commands and results
+
+1. Code style
+
+    ```bash
+    vendor\bin\pint --dirty --format agent
+    ```
+
+    Result: PASSED.
+
+2. Route registration and middleware
+
+    ```bash
+    php artisan route:list --path=projects -v
+    ```
+
+    Result: `POST projects/{project}/generations .. projects.generations.store`
+    with middleware `web`, `auth`.
+
+3. Complete test suite
+
+    ```bash
+    php artisan test --compact
+    ```
+
+    Result: PASSED — 93 tests, 90 passed, 3 skipped, 1 risky, 336 assertions.
+
+4. Static analysis
+
+    ```bash
+    vendor\bin\phpstan analyse --memory-limit=1024M
+    ```
+
+    Result: PASSED — 0 errors.
+
+### Summary
+
+- Guest blocked by `auth` middleware; cross-user request blocked by `abort(403)`.
+- Invalid project input returns before any OpenAI call and writes no record.
+- Exactly one `ContentGeneration` row per request, completed or failed.
+- No API key, provider body, stack trace, or exception message reaches the browser.
+- Endpoint tests are deliberately deferred to Step 9.
