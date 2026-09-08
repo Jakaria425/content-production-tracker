@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectContentPlanController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureTeamMembership;
@@ -19,6 +20,7 @@ Route::prefix('{current_team}')
     });
 
 Route::middleware(['auth'])->group(function (): void {
+    Route::post('projects/{project}/generations', [ProjectContentPlanController::class, 'store'])->name('projects.generations.store');
     Route::post('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');
     Route::delete('invitations/{invitation}', [TeamInvitationController::class, 'decline'])->name('invitations.decline');
 });
