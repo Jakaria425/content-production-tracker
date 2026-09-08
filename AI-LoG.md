@@ -1,4 +1,206 @@
-# AI Usage Log DAY-3
+# DAY-1
+
+## Entry 1
+
+### Task
+Setup project
+
+### Prompt
+I asked the AI about timeout during composer installation 
+
+### Suggested Solution
+AI suggested about network issue and install composer late but first complete current progress and clear cash file
+
+### My Verification
+ I googled it and fond same suggestion 
+
+### My Changes
+Nothing to change in command as it is fixed 'install composer'
+
+
+
+## Entry 2
+
+### Task
+Database creation
+
+### Prompt
+I asked the AI  Can't connect to MySQL server on 'localhost:3306' (10061)
+
+### Suggested Solution
+AI suggested  me to start the mysql server first. Also suggest me to bypass password (as i couldn't remember )
+
+### My Verification
+i just follow provided steps
+
+### My Changes
+---
+
+
+
+## Entry 3
+
+### Task
+Database migration 
+
+### Prompt
+I asked the AI  about 'INFO Nothing to migrate.'
+
+### Suggested Solution
+AI suggested  me to check .env file
+
+### My Verification
+i discover that I change .env.example instate .env
+
+### My Changes
+i change .env and configure database 
+
+
+
+
+## Entry 4
+
+### Task
+Database migration 
+
+### Prompt
+I asked the AI  about 'INFO Nothing to migrate.'
+
+### Suggested Solution
+AI suggested  me to check .env file
+
+### My Verification
+i discover that I change .env.example instate .env
+
+### My Changes
+i change .env and configure database 
+
+
+#  DAY-2
+
+## Entry 1
+
+### Task
+
+Set up and configure the Laravel development environment and database for the Content Production Tracker project.
+
+### Prompt
+
+I asked AI for help understanding and resolving Laravel setup issues, including Composer dependencies, PHP configuration, database configuration, MySQL connection problems, and Laravel migrations.
+
+### Suggested Solution
+
+AI suggested checking the Laravel environment configuration, PHP extensions, Composer dependencies, database settings in `.env`, and MySQL service status. It also explained how to run Laravel migration commands and troubleshoot database driver and connection errors.
+
+### My Verification
+
+I tested the suggested commands in my local Laravel environment and checked the migration output. I also verified that the required database connection and migrations were working correctly.
+
+### My Changes
+
+I configured the Laravel project environment, fixed the database connection issues, created/configured the project database, and successfully ran the Laravel migrations.
+
+---
+
+## Entry 2
+
+### Task
+
+Design the `Project` database table and establish project ownership.
+
+### Prompt
+
+I asked AI how to design the projects table, including the required fields and why `user_id` should be used as a foreign key.
+
+### Suggested Solution
+
+AI suggested adding `user_id` as a foreign key referencing the `users` table. It also recommended fields such as `title`, `content_type`, `status`, `due_date`, `brief`, and `notes`.
+
+### My Verification
+
+I reviewed the proposed database structure against the project requirements and tested the migration and database relationships.
+
+### My Changes
+
+I created the projects table with the required fields and added the `user_id` foreign key to associate each project with its owner.
+
+---
+
+## Entry 3
+
+### Task
+
+Implement and understand the `Project` Eloquent model.
+
+### Prompt
+
+I asked AI to explain and help implement the Laravel `Project` model, including `HasFactory`, `Model`, `BelongsTo`, `$fillable`, `$casts`, and the project-user relationship.
+
+### Suggested Solution
+
+AI suggested using Eloquent relationships and defining the project's mass-assignable fields through `$fillable`. It also recommended casting `due_date` as a date and defining a `belongsTo` relationship with the User model.
+
+### My Verification
+
+I reviewed the generated model code and tested the project functionality against the database structure.
+
+### My Changes
+
+I implemented the `Project` model, configured `$fillable`, added the `due_date` cast, and added the relationship between `Project` and `User`.
+
+---
+
+## Entry 4
+
+### Task
+
+Implement project ownership authorization.
+
+### Prompt
+
+I asked AI how to prevent one authenticated user from viewing or accessing another user's projects.
+
+### Suggested Solution
+
+AI suggested checking the authenticated user's ID against the project's `user_id` before allowing access.
+
+### My Verification
+
+I created multiple users and projects and tested that each user could access only their own projects.
+
+### My Changes
+
+I added project ownership checks so that users cannot access projects belonging to another user.
+
+---
+
+## Entry 5
+
+### Task
+
+Create and run tests for project ownership and validation.
+
+### Prompt
+
+I asked AI for help writing Laravel tests for authentication, project ownership, validation, and database behavior.
+
+### Suggested Solution
+
+AI recommended using Laravel factories to create test users and projects and using separate users to verify that authorization rules prevent cross-user access.
+
+### My Verification
+
+I ran the PHP test suite and reviewed the test results. I fixed issues where necessary and reran the tests.
+
+### My Changes
+
+I added/updated feature tests covering authenticated access, project ownership, validation, and database behavior.
+
+
+
+
+
+#  DAY-3
 
 ## Entry 1 — OpenAI service: return-based vs throw-based errors
 
@@ -181,6 +383,59 @@ generation, matching the existing controllers exactly.
 It follows the established project convention instead of inventing a second
 messaging channel, so the toast actually renders and the tests can assert
 against the same shape the rest of the suite uses.
+
+
+---
+
+## Entry 7 — `provider_error`: TLS root cause and account quota
+
+### Task
+
+The "Generate content plan" button always returned the safe failure message,
+and every saved row had `error_code = provider_error`. Diagnose accurately
+without ever printing the API key or changing app behaviour.
+
+### Investigation steps
+
+1. **Free diagnostic GET `/v1/models`** with the key (zero token cost).
+   Result: `ConnectionException — cURL error 60: unable to get local issuer
+   certificate`.
+2. **Checked the TLS setup**: `curl.cainfo` and `openssl.cafile` were empty
+   in `C:\php-8.5.8\php.ini`; no `cacert.pem` existed on `C:\`. That explained
+   the original `provider_error` — the outbound HTTPS call died before ever
+   reaching OpenAI.
+3. **Fixed the environment**: downloaded the official Mozilla CA bundle to
+   `C:\php-8.5.8\extras\ssl\cacert.pem`, enabled both php.ini directives.
+   Retry GET → HTTP 200, 133 models. Key format and connectivity confirmed.
+4. **Reproduced the exact POST the service sends** (same prompt, same JSON
+   schema, same model) to get the real provider answer:
+
+   ```
+   HTTP 429  insufficient_quota  credit_balance_exhausted
+   ```
+
+   The account has no API credits. ChatGPT subscriptions do not include API
+   credit, so the key is valid but the billing balance is zero.
+
+### Verification
+
+- `GET /v1/models` with the key returns 200 after the php.ini change.
+- The exact production payload returns 429 + `credit_balance_exhausted`,
+  so the request shape is accepted and rejected only for billing.
+
+### Why no code change was needed
+
+The Step 6/7 design already handles this correctly and safely: the only thing
+the user sees is the generic sentence; the diagnostic detail lives in
+`content_generations.error_code`. Nothing in the app needed to change, and
+exposing `insufficient_quota` to the browser would violate the "one generic
+message" rule from Entry 5.
+
+### Environment note
+
+The TLS fix is a machine-level php.ini change (`curl.cainfo` / `openssl.cafile`
+→ `C:/php-8.5.8/extras/ssl/cacert.pem`), not a repo change. It affects all
+outbound HTTPS from this PHP install.
 
 
 

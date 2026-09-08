@@ -86,7 +86,7 @@ Open <http://localhost:8000> and register a new account, or follow the migration
 
 ### Database migration
 
-After configuring your `DB_*` values in `.env`, create the schema:
+After configuring your Database Credentials and Database Seeder Credentials  values in `.env`, create the schema:
 
 ```bash
 php artisan migrate
@@ -111,12 +111,7 @@ This creates **one demo user** and **10 content projects** owned by that user (v
 
 ### Demo login
 
-After `php artisan db:seed`, sign in at <http://localhost:8000/login> with:
-
-| Email                 | Password   |
-| --------------------- | ---------- |
-| `intern@example.test` | `password` |
-
+After `php artisan db:seed`, sign in at <http://localhost:8000/login> with: Email, Password 
 Both values come from the `SEEDER_USER_EMAIL` and `SEEDER_USER_PASSWORD` environment variables, so they can be changed without touching source code.
 
 ---

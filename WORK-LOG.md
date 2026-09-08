@@ -372,3 +372,121 @@ user owns, saves one ContentGeneration record, and flashes a safe message.
 - Exactly one `ContentGeneration` row per request, completed or failed.
 - No API key, provider body, stack trace, or exception message reaches the browser.
 - Endpoint tests are deliberately deferred to Step 9.
+
+
+## 2026-09-07 — Day 3 Step 8: Generate button and latest plan display (Vue)
+
+Task: give the user an in-UI trigger for generation and a read-only view of the
+most recently saved successful plan, in TypeScript with no uses of `any`.
+
+### Design decisions
+
+- **Button only on projects that have a `brief`**, matching the assignment's
+  `v-if="project.brief"` requirement. Without a brief the button is not rendered.
+- **Global latest plan, not per-project** (singlular wording in the assignment).
+  `ProjectController` loads `latestGeneration` = the newest `completed` row
+  whose project belongs to the authenticated user, checked via
+  `whereHas('project', fn => $q->where('user_id', $request->user()->id))`.
+  A per-project query would have been the same code for less clarity.
+- **Generation kicked off with the generated Wayfinder helper**
+  `generatePlan($project)` (`router.post`), matching how the rest of the app
+  does XHR calls. `isGenerating` disables the button while the request runs.
+
+### Changes made
+
+| Type | File | Detail |
+|---|---|---|
+| EDIT | `resources/js/types/projects.ts` | Added `Project.brief`, `ContentPlan`, `ContentPlanOutlineItem`, `LatestGeneration` (flat `response` object). No `any` |
+| EDIT | `app/Http/Controllers/ProjectController.php` | Index adds `brief` and `latestGeneration` to the Inertia props |
+| EDIT | `resources/js/pages/Projects.vue` | `isGenerating` ref, `generateContentPlan()` via `generatePlan($project)`, Button `v-if="project.brief"`, six read-only sections (suggested_title, content_brief, outline, key_points, production_tasks, risks) |
+
+### Commands and results
+
+1. Wayfinder helpers (run inside `resources/js`)
+
+    ```bash
+    php artisan wayfinder:generate --with-form
+    ```
+
+    Result: PASSED — emitted `resources/js/routes/projects/generations/index.ts`.
+
+2. TypeScript type-check
+
+    ```bash
+    NODE_OPTIONS=--max-old-space-size=4096 npm run type-check
+    ```
+
+    Result: PASSED — `vue-tsc --noEmit` clean.
+
+3. Static analysis
+
+    ```bash
+    vendor\bin\phpstan analyse --memory-limit=1024M
+    ```
+
+    Result: PASSED — 0 errors.
+
+4. Complete test suite
+
+    ```bash
+    php artisan test --compact
+    ```
+
+    Result: PASSED — 93 tests, 90 passed, 3 skipped, 1 risky, 336 assertions.
+
+### Summary
+
+- Existing `ProjectsTest` assertions use `->has()`/`->where()`, so new props
+  (`brief`, `latestGeneration`) did not break them.
+- The failure message still comes from the controller's single
+  `SAFE_FAILURE_MESSAGE`, so Step 6/7 guarantees were untouched.
+
+
+## 2026-09-07 — Day 3 diagnosis: why the button always failed
+
+Symptom: every generation produced a failed row with `error_code =
+provider_error` and only the generic safe message in the UI.
+
+### Investigation path
+
+1. Ruled out config: `.env` key is a well-formed dequoted `sk-proj-...`, no
+   config cache, model present, prompt length 462 chars saved on the row.
+2. Free diagnostic GET `/v1/models` with the key (zero token cost):
+   `ConnectionException: cURL error 60 — unable to get local issuer
+   certificate`. PHP on this machine had NO CA bundle:
+   `curl.cainfo=` and `openssl.cafile=` were both empty in
+   `C:\php-8.5.8\php.ini`, and no `cacert.pem` existed on `C:\`.
+3. Fix: downloaded the official Mozilla bundle to
+   `C:\php-8.5.8\extras\ssl\cacert.pem`, enabled
+   `curl.cainfo` and `openssl.cafile` in `php.ini` (path uses forward
+   slashes). Retry: `GET /v1/models` → HTTP 200, 133 models. Key valid,
+   connectivity restored.
+4. Reproduced the exact `POST /v1/responses` payload the service sends
+   (same model, same prompt from `buildPrompt`, same JSON schema via
+   reflection). Provider answered:
+
+   ```
+   HTTP 429  insufficient_quota  credit_balance_exhausted
+   "You have no credits remaining. Add credits to continue using the API at
+   https://platform.openai.com/settings/organization/billing/"
+   ```
+
+### Conclusion
+
+- The original `provider_error` was the TLS failure (step 2), not OpenAI.
+- With TLS fixed and the key valid, generation is blocked only by the account
+  having **zero API credits** (ChatGPT Plus does not include API credit).
+- **No application code changed** — this was purely an environment issue. The
+  Step 6/7 design (generic message, `error_code` only) already behaves exactly
+  as required for this failure.
+- To enable a live test the owner must add credits at
+  `platform.openai.com/settings/organization/billing/`.
+
+### Commands and results
+
+```bash
+curl.exe -L --fail -o C:\php-8.5.8\extras\ssl\cacert.pem https://curl.se/ca/cacert.pem
+```
+
+Result: PASSED — 188,900-byte bundle; `php -r "echo ini_get('curl.cainfo')"`
+returns the new path.
