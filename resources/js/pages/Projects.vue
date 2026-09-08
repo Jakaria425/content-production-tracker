@@ -31,14 +31,18 @@ function generateContentPlan(project: Project): void {
         return;
     }
 
-    router.post(generatePlan(project).url, {}, {
-        onStart: () => {
-            isGenerating.value = true;
+    router.post(
+        generatePlan(project).url,
+        {},
+        {
+            onStart: () => {
+                isGenerating.value = true;
+            },
+            onFinish: () => {
+                isGenerating.value = false;
+            },
         },
-        onFinish: () => {
-            isGenerating.value = false;
-        },
-    });
+    );
 }
 </script>
 
@@ -67,10 +71,7 @@ function generateContentPlan(project: Project): void {
         </div>
 
         <div v-else class="space-y-3">
-            <template
-                v-for="project in projects"
-                :key="project.id"
-            >
+            <template v-for="project in projects" :key="project.id">
                 <div
                     class="flex items-center justify-between gap-4 rounded-lg border p-4"
                 >
@@ -89,7 +90,11 @@ function generateContentPlan(project: Project): void {
                             :disabled="isGenerating"
                             @click="generateContentPlan(project)"
                         >
-                            {{ isGenerating ? 'Generating…' : 'Generate content plan' }}
+                            {{
+                                isGenerating
+                                    ? 'Generating…'
+                                    : 'Generate content plan'
+                            }}
                         </Button>
                         <Badge variant="secondary">{{ project.status }}</Badge>
                         <span class="text-muted-foreground text-sm">
@@ -99,7 +104,10 @@ function generateContentPlan(project: Project): void {
                 </div>
 
                 <section
-                    v-if="latestGeneration && latestGeneration.project_id === project.id"
+                    v-if="
+                        latestGeneration &&
+                        latestGeneration.project_id === project.id
+                    "
                     class="space-y-5 rounded-lg border p-6"
                 >
                     <Heading
@@ -124,12 +132,18 @@ function generateContentPlan(project: Project): void {
 
                     <div>
                         <h3 class="font-medium">Outline</h3>
-                        <ul class="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+                        <ul
+                            class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
+                        >
                             <li
-                                v-for="(item, outlineIndex) in latestGeneration.outline"
+                                v-for="(
+                                    item, outlineIndex
+                                ) in latestGeneration.outline"
                                 :key="outlineIndex"
                             >
-                                <span class="text-foreground font-medium">{{ item.heading }}</span>
+                                <span class="text-foreground font-medium">{{
+                                    item.heading
+                                }}</span>
                                 — {{ item.purpose }}
                             </li>
                         </ul>
@@ -137,9 +151,13 @@ function generateContentPlan(project: Project): void {
 
                     <div>
                         <h3 class="font-medium">Key points</h3>
-                        <ul class="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+                        <ul
+                            class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
+                        >
                             <li
-                                v-for="(keyPoint, keyPointIndex) in latestGeneration.key_points"
+                                v-for="(
+                                    keyPoint, keyPointIndex
+                                ) in latestGeneration.key_points"
                                 :key="keyPointIndex"
                             >
                                 {{ keyPoint }}
@@ -149,9 +167,13 @@ function generateContentPlan(project: Project): void {
 
                     <div>
                         <h3 class="font-medium">Production tasks</h3>
-                        <ul class="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+                        <ul
+                            class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
+                        >
                             <li
-                                v-for="(task, taskIndex) in latestGeneration.production_tasks"
+                                v-for="(
+                                    task, taskIndex
+                                ) in latestGeneration.production_tasks"
                                 :key="taskIndex"
                             >
                                 {{ task }}
@@ -160,10 +182,16 @@ function generateContentPlan(project: Project): void {
                     </div>
 
                     <div>
-                        <h3 class="font-medium">Risks or missing information</h3>
-                        <ul class="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+                        <h3 class="font-medium">
+                            Risks or missing information
+                        </h3>
+                        <ul
+                            class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
+                        >
                             <li
-                                v-for="(risk, riskIndex) in latestGeneration.risks_or_missing_information"
+                                v-for="(
+                                    risk, riskIndex
+                                ) in latestGeneration.risks_or_missing_information"
                                 :key="riskIndex"
                             >
                                 {{ risk }}

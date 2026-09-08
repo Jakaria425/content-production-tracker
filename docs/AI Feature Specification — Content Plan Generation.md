@@ -34,12 +34,12 @@ The OpenAI API must be called from the Laravel backend. The browser communicates
 
 Laravel may send only these project fields to OpenAI:
 
-| Field | Required | Description |
-|---|---|---|
-| `title` | Yes | Project title |
-| `content_type` | Yes | Type of content being planned |
-| `brief` | Yes | Project/content brief |
-| `notes` | No | Additional project notes, only included when present |
+| Field          | Required | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `title`        | Yes      | Project title                                        |
+| `content_type` | Yes      | Type of content being planned                        |
+| `brief`        | Yes      | Project/content brief                                |
+| `notes`        | No       | Additional project notes, only included when present |
 
 The prompt must not contain:
 
@@ -62,23 +62,17 @@ OpenAI must return a structured JSON response matching the following schema:
 
 ```json
 {
-  "suggested_title": "string",
-  "content_brief": "string",
-  "outline": [
-    {
-      "heading": "string",
-      "purpose": "string"
-    }
-  ],
-  "key_points": [
-    "string"
-  ],
-  "production_tasks": [
-    "string"
-  ],
-  "risks_or_missing_information": [
-    "string"
-  ]
+    "suggested_title": "string",
+    "content_brief": "string",
+    "outline": [
+        {
+            "heading": "string",
+            "purpose": "string"
+        }
+    ],
+    "key_points": ["string"],
+    "production_tasks": ["string"],
+    "risks_or_missing_information": ["string"]
 }
 ```
 
@@ -105,18 +99,18 @@ Each generation is stored in the `content_generations` table.
 
 The following information is saved:
 
-| Field | Purpose |
-|---|---|
-| `project_id` | Identifies the project for which the plan was generated |
-| `status` | Indicates whether generation was `completed` or `failed` |
-| `prompt` | Stores the sanitized prompt sent to OpenAI |
-| `response` | Stores the validated structured AI response |
-| `model` | Stores the OpenAI model used |
-| `input_tokens` | Stores input token usage when provided |
-| `output_tokens` | Stores output token usage when provided |
-| `error_code` | Stores a safe error code when generation fails |
-| `created_at` | Records creation time |
-| `updated_at` | Records update time |
+| Field           | Purpose                                                  |
+| --------------- | -------------------------------------------------------- |
+| `project_id`    | Identifies the project for which the plan was generated  |
+| `status`        | Indicates whether generation was `completed` or `failed` |
+| `prompt`        | Stores the sanitized prompt sent to OpenAI               |
+| `response`      | Stores the validated structured AI response              |
+| `model`         | Stores the OpenAI model used                             |
+| `input_tokens`  | Stores input token usage when provided                   |
+| `output_tokens` | Stores output token usage when provided                  |
+| `error_code`    | Stores a safe error code when generation fails           |
+| `created_at`    | Records creation time                                    |
+| `updated_at`    | Records update time                                      |
 
 The `project_id` must reference an existing project.
 

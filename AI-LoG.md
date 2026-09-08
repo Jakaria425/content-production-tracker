@@ -3,80 +3,92 @@
 ## Entry 1
 
 ### Task
+
 Setup project
 
 ### Prompt
-I asked the AI about timeout during composer installation 
+
+I asked the AI about timeout during composer installation
 
 ### Suggested Solution
+
 AI suggested about network issue and install composer late but first complete current progress and clear cash file
 
 ### My Verification
- I googled it and fond same suggestion 
+
+I googled it and fond same suggestion
 
 ### My Changes
+
 Nothing to change in command as it is fixed 'install composer'
-
-
 
 ## Entry 2
 
 ### Task
+
 Database creation
 
 ### Prompt
-I asked the AI  Can't connect to MySQL server on 'localhost:3306' (10061)
+
+I asked the AI Can't connect to MySQL server on 'localhost:3306' (10061)
 
 ### Suggested Solution
-AI suggested  me to start the mysql server first. Also suggest me to bypass password (as i couldn't remember )
+
+AI suggested me to start the mysql server first. Also suggest me to bypass password (as i couldn't remember )
 
 ### My Verification
+
 i just follow provided steps
 
 ### My Changes
+
 ---
-
-
 
 ## Entry 3
 
 ### Task
-Database migration 
+
+Database migration
 
 ### Prompt
-I asked the AI  about 'INFO Nothing to migrate.'
+
+I asked the AI about 'INFO Nothing to migrate.'
 
 ### Suggested Solution
-AI suggested  me to check .env file
+
+AI suggested me to check .env file
 
 ### My Verification
+
 i discover that I change .env.example instate .env
 
 ### My Changes
-i change .env and configure database 
 
-
-
+i change .env and configure database
 
 ## Entry 4
 
 ### Task
-Database migration 
+
+Database migration
 
 ### Prompt
-I asked the AI  about 'INFO Nothing to migrate.'
+
+I asked the AI about 'INFO Nothing to migrate.'
 
 ### Suggested Solution
-AI suggested  me to check .env file
+
+AI suggested me to check .env file
 
 ### My Verification
+
 i discover that I change .env.example instate .env
 
 ### My Changes
-i change .env and configure database 
 
+i change .env and configure database
 
-#  DAY-2
+# DAY-2
 
 ## Entry 1
 
@@ -196,11 +208,7 @@ I ran the PHP test suite and reviewed the test results. I fixed issues where nec
 
 I added/updated feature tests covering authenticated access, project ownership, validation, and database behavior.
 
-
-
-
-
-#  DAY-3
+# DAY-3
 
 ## Entry 1 — OpenAI service: return-based vs throw-based errors
 
@@ -265,6 +273,7 @@ The AI explained that HTTP 200 OK can still contain non-compliant JSON if someth
 ### Why kept
 
 The schema is a contract with OpenAI. `validateResponse()` is a firewall between the API response and application logic. It catches:
+
 - Missing required keys
 - Outline items that are not objects with `heading` + `purpose`
 
@@ -285,6 +294,7 @@ Pick a model name for the development configuration.
 ### Prompt
 
 I recommended `gpt-4o-mini` as the default because it is:
+
 - Available to virtually all OpenAI keys
 - Supports the Responses API and JSON schema
 - Cheapest option for development, so manual tests cost minimal credit
@@ -384,7 +394,6 @@ It follows the established project convention instead of inventing a second
 messaging channel, so the toast actually renders and the tests can assert
 against the same shape the rest of the suite uses.
 
-
 ---
 
 ## Entry 7 — `provider_error`: TLS root cause and account quota
@@ -399,7 +408,7 @@ without ever printing the API key or changing app behaviour.
 
 1. **Free diagnostic GET `/v1/models`** with the key (zero token cost).
    Result: `ConnectionException — cURL error 60: unable to get local issuer
-   certificate`.
+certificate`.
 2. **Checked the TLS setup**: `curl.cainfo` and `openssl.cafile` were empty
    in `C:\php-8.5.8\php.ini`; no `cacert.pem` existed on `C:\`. That explained
    the original `provider_error` — the outbound HTTPS call died before ever
@@ -410,12 +419,12 @@ without ever printing the API key or changing app behaviour.
 4. **Reproduced the exact POST the service sends** (same prompt, same JSON
    schema, same model) to get the real provider answer:
 
-   ```
-   HTTP 429  insufficient_quota  credit_balance_exhausted
-   ```
+    ```
+    HTTP 429  insufficient_quota  credit_balance_exhausted
+    ```
 
-   The account has no API credits. ChatGPT subscriptions do not include API
-   credit, so the key is valid but the billing balance is zero.
+    The account has no API credits. ChatGPT subscriptions do not include API
+    credit, so the key is valid but the billing balance is zero.
 
 ### Verification
 
@@ -436,6 +445,3 @@ message" rule from Entry 5.
 The TLS fix is a machine-level php.ini change (`curl.cainfo` / `openssl.cafile`
 → `C:/php-8.5.8/extras/ssl/cacert.pem`), not a repo change. It affects all
 outbound HTTPS from this PHP install.
-
-
-

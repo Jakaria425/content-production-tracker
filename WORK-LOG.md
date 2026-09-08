@@ -129,29 +129,24 @@ No files were deleted.
 - No `.env`/`.env.example` changes needed; the demo defaults remain the
   IANA-reserved `.test` domain values.
 
-
-
-
-
 ### ---------DAY-3-------
 
-Start time  09:30 - 09/07/2026
+Start time 09:30 - 09/07/2026
 
 ## baseline verification
 
 php artisan test tests/Feature/ProjectsTest.php
 
-   PASS  Tests\Feature\ProjectsTest
-  ✓ guests are redirected to the login page                                        0.23s  
-  ✓ authenticated users can open the projects page                                 2.16s  
-  ✓ the projects page shows only the authenticated user projects                   2.08s  
-  ✓ the projects page does not expose another user projects                        2.08s  
-  ✓ projects are ordered from newest to oldest                                     2.08s  
-  ✓ an account without projects sees the empty state                               2.07s  
+PASS Tests\Feature\ProjectsTest
+✓ guests are redirected to the login page 0.23s  
+✓ authenticated users can open the projects page 2.16s  
+✓ the projects page shows only the authenticated user projects 2.08s  
+✓ the projects page does not expose another user projects 2.08s  
+✓ projects are ordered from newest to oldest 2.08s  
+✓ an account without projects sees the empty state 2.07s
 
-  Tests:    6 passed (68 assertions)
-  Duration: 10.84s
-
+Tests: 6 passed (68 assertions)
+Duration: 10.84s
 
 npm run type-check && echo TYPE CHECK PASSED
 
@@ -160,26 +155,17 @@ npm run type-check && echo TYPE CHECK PASSED
 
 TYPE CHECK PASSED
 
+- Starting branch and commit
+  git clone https://github.com/Jakaria425/content-production-tracker.git
+  cd content-production-tracker
+  git checkout -b feature
+  git push origin feature
 
-
-
-
-
-
-
-
-* Starting branch and commit
-git clone https://github.com/Jakaria425/content-production-tracker.git
-cd content-production-tracker
-git checkout -b feature
-git push origin feature
-
-* Setup commands
-composer install
-npm install
-copy .env.example .env  [// configure database ]
-php artisan key:generate
-
+- Setup commands
+  composer install
+  npm install
+  copy .env.example .env [// configure database ]
+  php artisan key:generate
 
 ## OpenAI safe configuration
 
@@ -188,10 +174,10 @@ Application code must use config(), never env().
 
 ### Changes made
 
-| Type | File | Detail |
-|---|---|---|
-| EDIT | `.env.example` | Added `# AI api credentials` section with empty OPENAI_API_KEY= and OPENAI_MODEL= placeholders |
-| EDIT | `config/services.php` | Added `openai` block: `api_key` and `model` via env(), fixed `timeout` of 30 seconds |
+| Type   | File                              | Detail                                                                                                                  |
+| ------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| EDIT   | `.env.example`                    | Added `# AI api credentials` section with empty OPENAI_API_KEY= and OPENAI_MODEL= placeholders                          |
+| EDIT   | `config/services.php`             | Added `openai` block: `api_key` and `model` via env(), fixed `timeout` of 30 seconds                                    |
 | CREATE | `tests/Unit/OpenAIConfigTest.php` | Verifies .env.example has correct names and no real key; config reads via env(); future service uses config() not env() |
 
 ### Commands and results
@@ -227,19 +213,18 @@ Application code must use config(), never env().
 - config/services.php reads via env() as required.
 - Third test skips until OpenAIService is created.
 
-
 ## ContentGeneration model, migration, factory
 
 Task: create the content_generations table and model.
 
 ### Changes made
 
-| Type | File | Detail |
-|---|---|---|
+| Type   | File                                                                      | Detail                                                                                                                            |
+| ------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | CREATE | `database/migrations/2026_09_07_..._create_content_generations_table.php` | FK to project_id with cascade delete, status, prompt, response (JSON), model, input_tokens, output_tokens, error_code, timestamps |
-| CREATE | `app/Models/ContentGeneration.php` | $fillable, response cast to array, belongsTo(Project) |
-| CREATE | `database/factories/ContentGenerationFactory.php` | Default completed state with fake structured response; failed() state for testing |
-| EDIT | `app/Models/Project.php` | Added contentGenerations() hasMany relationship |
+| CREATE | `app/Models/ContentGeneration.php`                                        | $fillable, response cast to array, belongsTo(Project)                                                                             |
+| CREATE | `database/factories/ContentGenerationFactory.php`                         | Default completed state with fake structured response; failed() state for testing                                                 |
+| EDIT   | `app/Models/Project.php`                                                  | Added contentGenerations() hasMany relationship                                                                                   |
 
 Note: migration failed on first run because old table existed from a previous session. Dropped it manually:
 
@@ -258,7 +243,6 @@ php artisan test --compact
 
 Result: 90 tests, 87 passed, 3 skipped, 1 risky.
 
-
 ## OpenAI service
 
 Task: build app/Services/OpenAIService.php — one class, return-based errors.
@@ -274,8 +258,8 @@ Task: build app/Services/OpenAIService.php — one class, return-based errors.
 
 ### Changes made
 
-| Type | File | Detail |
-|---|---|---|
+| Type   | File                             | Detail                                                                     |
+| ------ | -------------------------------- | -------------------------------------------------------------------------- |
 | CREATE | `app/Services/OpenAIService.php` | generate(Project), buildPrompt(Project), schema(), validateResponse(array) |
 
 ### Commands and results
@@ -296,10 +280,10 @@ Result: 93 tests, 90 passed, 3 skipped, 1 risky.
 ### Summary
 
 The service satisfies every requirement from Step 6 with no extensions:
+
 - Receives Project, builds prompt from allowed fields, calls Responses API with JSON schema,
 - Validates every required field and nested item, extracts tokens, returns a clearly defined array.
 - No retries, no queues, no streaming, no extra files.
-
 
 ## Generation endpoint and authorization
 
@@ -325,10 +309,10 @@ user owns, saves one ContentGeneration record, and flashes a safe message.
 
 ### Changes made
 
-| Type | File | Detail |
-|---|---|---|
+| Type   | File                                                    | Detail                                                                                                                                                         |
+| ------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CREATE | `app/Http/Controllers/ProjectContentPlanController.php` | `store(Request, Project)` — ownership check, input gate, `OpenAIService` via constructor injection, single `ContentGeneration::create()`, safe flash, `back()` |
-| EDIT | `routes/web.php` | Added `POST projects/{project}/generations` → `projects.generations.store` inside the existing `auth` middleware group |
+| EDIT   | `routes/web.php`                                        | Added `POST projects/{project}/generations` → `projects.generations.store` inside the existing `auth` middleware group                                         |
 
 ### Commands and results
 
@@ -373,7 +357,6 @@ user owns, saves one ContentGeneration record, and flashes a safe message.
 - No API key, provider body, stack trace, or exception message reaches the browser.
 - Endpoint tests are deliberately deferred to Step 9.
 
-
 ## Generate button and latest plan display (Vue)
 
 Task: give the user an in-UI trigger for generation and a read-only view of the
@@ -394,11 +377,11 @@ most recently saved successful plan, in TypeScript with no uses of `any`.
 
 ### Changes made
 
-| Type | File | Detail |
-|---|---|---|
-| EDIT | `resources/js/types/projects.ts` | Added `Project.brief`, `ContentPlan`, `ContentPlanOutlineItem`, `LatestGeneration` (flat `response` object). No `any` |
-| EDIT | `app/Http/Controllers/ProjectController.php` | Index adds `brief` and `latestGeneration` to the Inertia props |
-| EDIT | `resources/js/pages/Projects.vue` | `isGenerating` ref, `generateContentPlan()` via `generatePlan($project)`, Button `v-if="project.brief"`, six read-only sections (suggested_title, content_brief, outline, key_points, production_tasks, risks) |
+| Type | File                                         | Detail                                                                                                                                                                                                         |
+| ---- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EDIT | `resources/js/types/projects.ts`             | Added `Project.brief`, `ContentPlan`, `ContentPlanOutlineItem`, `LatestGeneration` (flat `response` object). No `any`                                                                                          |
+| EDIT | `app/Http/Controllers/ProjectController.php` | Index adds `brief` and `latestGeneration` to the Inertia props                                                                                                                                                 |
+| EDIT | `resources/js/pages/Projects.vue`            | `isGenerating` ref, `generateContentPlan()` via `generatePlan($project)`, Button `v-if="project.brief"`, six read-only sections (suggested_title, content_brief, outline, key_points, production_tasks, risks) |
 
 ### Commands and results
 
@@ -441,7 +424,6 @@ most recently saved successful plan, in TypeScript with no uses of `any`.
 - The failure message still comes from the controller's single
   `SAFE_FAILURE_MESSAGE`, so Step 6/7 guarantees were untouched.
 
-
 ## diagnosis: why the button always failed
 
 Symptom: every generation produced a failed row with `error_code =
@@ -453,7 +435,7 @@ provider_error` and only the generic safe message in the UI.
    config cache, model present, prompt length 462 chars saved on the row.
 2. Free diagnostic GET `/v1/models` with the key (zero token cost):
    `ConnectionException: cURL error 60 — unable to get local issuer
-   certificate`. PHP on this machine had NO CA bundle:
+certificate`. PHP on this machine had NO CA bundle:
    `curl.cainfo=` and `openssl.cafile=` were both empty in
    `C:\php-8.5.8\php.ini`, and no `cacert.pem` existed on `C:\`.
 3. Fix: downloaded the official Mozilla bundle to
@@ -465,11 +447,11 @@ provider_error` and only the generic safe message in the UI.
    (same model, same prompt from `buildPrompt`, same JSON schema via
    reflection). Provider answered:
 
-   ```
-   HTTP 429  insufficient_quota  credit_balance_exhausted
-   "You have no credits remaining. Add credits to continue using the API at
-   https://platform.openai.com/settings/organization/billing/"
-   ```
+    ```
+    HTTP 429  insufficient_quota  credit_balance_exhausted
+    "You have no credits remaining. Add credits to continue using the API at
+    https://platform.openai.com/settings/organization/billing/"
+    ```
 
 ### Conclusion
 
@@ -491,7 +473,6 @@ curl.exe -L --fail -o C:\php-8.5.8\extras\ssl\cacert.pem https://curl.se/ca/cace
 Result: PASSED — 188,900-byte bundle; `php -r "echo ini_get('curl.cainfo')"`
 returns the new path.
 
-
 ## AI feature tests — Step 9
 
 Task: add focused Pest tests for the content-generation model, the OpenAI service,
@@ -500,12 +481,12 @@ provider response and never calling the real OpenAI API.
 
 ### Test files created
 
-| File | Scope | Tests |
-|---|---|---|
-| `tests/Unit/ContentGenerationModelTest.php` | `ContentGeneration` model | 6 |
-| `tests/Unit/OpenAIServiceTest.php` | `OpenAIService::generate()` | 9 |
-| `tests/Feature/ContentGenerationTest.php` | Endpoint + authorization | 14 |
-| `tests/Feature/ContentPlanDisplayTest.php` | Vue Inertia prop contract | 3 |
+| File                                        | Scope                       | Tests |
+| ------------------------------------------- | --------------------------- | ----- |
+| `tests/Unit/ContentGenerationModelTest.php` | `ContentGeneration` model   | 6     |
+| `tests/Unit/OpenAIServiceTest.php`          | `OpenAIService::generate()` | 9     |
+| `tests/Feature/ContentGenerationTest.php`   | Endpoint + authorization    | 14    |
+| `tests/Feature/ContentPlanDisplayTest.php`  | Vue Inertia prop contract   | 3     |
 
 ### Commands and results
 
@@ -561,54 +542,54 @@ reasons before it reaches the PHP tests.
 
 ```text
    PASS  Tests\Unit\ContentGenerationModelTest
-  ✓ it casts the response column as an array                                                                 0.28s  
-  ✓ it persists tracked fields                                                                               0.01s  
-  ✓ it belongs to its project                                                                                0.02s  
-  ✓ it factory default is a completed generation                                                             0.01s  
-  ✓ it factory failed state clears response data                                                             0.01s  
-  ✓ it deletes generations when the project is deleted                                                       0.01s  
+  ✓ it casts the response column as an array                                                                 0.28s
+  ✓ it persists tracked fields                                                                               0.01s
+  ✓ it belongs to its project                                                                                0.02s
+  ✓ it factory default is a completed generation                                                             0.01s
+  ✓ it factory failed state clears response data                                                             0.01s
+  ✓ it deletes generations when the project is deleted                                                       0.01s
 
 
    PASS  Tests\Unit\OpenAIConfigTest
-  ✓ openai credentials come from environment via config, not hardcoded                                       0.01s  
-  ✓ services config reads openai values from environment                                                     0.01s  
-  ✓ application code does not call env for openai credentials                                                0.01s  
+  ✓ openai credentials come from environment via config, not hardcoded                                       0.01s
+  ✓ services config reads openai values from environment                                                     0.01s
+  ✓ application code does not call env for openai credentials                                                0.01s
 
    PASS  Tests\Unit\OpenAIServiceTest
-  ✓ it returns missing_configuration when the api key is empty                                               0.02s  
-  ✓ it returns missing_configuration when the model is empty                                                 0.01s  
-  ✓ it returns provider_error on a non-2xx response                                                          0.05s  
-  ✓ it returns provider_error on a connection failure                                                        0.01s  
-  ✓ it returns invalid_response when output text is not valid json                                           0.01s  
-  ✓ it returns invalid_response when the json misses a required key                                          0.01s  
-  ✓ it returns completed with parsed data and token usage                                                    0.01s  
-  ✓ it sends a strict json_schema format                                                                     0.01s  
-  ✓ it builds the prompt from allowed fields and excludes secrets                                            0.01s  
-                                                                  
+  ✓ it returns missing_configuration when the api key is empty                                               0.02s
+  ✓ it returns missing_configuration when the model is empty                                                 0.01s
+  ✓ it returns provider_error on a non-2xx response                                                          0.05s
+  ✓ it returns provider_error on a connection failure                                                        0.01s
+  ✓ it returns invalid_response when output text is not valid json                                           0.01s
+  ✓ it returns invalid_response when the json misses a required key                                          0.01s
+  ✓ it returns completed with parsed data and token usage                                                    0.01s
+  ✓ it sends a strict json_schema format                                                                     0.01s
+  ✓ it builds the prompt from allowed fields and excludes secrets                                            0.01s
+
 
    PASS  Tests\Feature\Auth\PasswordResetTest
-  ✓ reset password link screen can be rendered                                                               0.02s  
-  ✓ reset password link can be requested                                                                     0.24s  
-  ✓ reset password screen can be rendered                                                                    0.23s  
-  ✓ password can be reset with valid token                                                                   0.23s  
-  ✓ password cannot be reset with invalid token                                                              0.22s  
+  ✓ reset password link screen can be rendered                                                               0.02s
+  ✓ reset password link can be requested                                                                     0.24s
+  ✓ reset password screen can be rendered                                                                    0.23s
+  ✓ password can be reset with valid token                                                                   0.23s
+  ✓ password cannot be reset with invalid token                                                              0.22s
 
 
    PASS  Tests\Feature\ContentGenerationTest
-  ✓ a guest cannot generate a content plan                                                                   0.02s  
-  ✓ a user can generate a plan for their own project                                                         0.02s  
-  ✓ a user cannot generate a plan for another user project                                                   0.02s  
-  ✓ invalid project input prevents the provider request                                                      0.01s  
-  ✓ the outgoing request uses the configured model                                                           0.01s  
-  ✓ the outgoing prompt includes the allowed project data                                                    0.01s  
-  ✓ the outgoing prompt excludes unrelated user data and secrets                                             0.01s  
-  ✓ a successful structured response is validated and saved                                                  0.01s  
-  ✓ token usage is saved when present                                                                        0.01s  
-  ✓ a provider http failure saves a failed generation and shows a safe message                               0.01s  
-  ✓ malformed structured output saves a failed generation and shows a safe message                           0.02s  
-  ✓ the api key and provider error body do not appear in the browser response                                0.01s  
-  ✓ a project with a completed generation reports has_content_plan true                                      0.02s  
-  ✓ a project with only a failed generation reports has_content_plan false                                   0.02s  
+  ✓ a guest cannot generate a content plan                                                                   0.02s
+  ✓ a user can generate a plan for their own project                                                         0.02s
+  ✓ a user cannot generate a plan for another user project                                                   0.02s
+  ✓ invalid project input prevents the provider request                                                      0.01s
+  ✓ the outgoing request uses the configured model                                                           0.01s
+  ✓ the outgoing prompt includes the allowed project data                                                    0.01s
+  ✓ the outgoing prompt excludes unrelated user data and secrets                                             0.01s
+  ✓ a successful structured response is validated and saved                                                  0.01s
+  ✓ token usage is saved when present                                                                        0.01s
+  ✓ a provider http failure saves a failed generation and shows a safe message                               0.01s
+  ✓ malformed structured output saves a failed generation and shows a safe message                           0.02s
+  ✓ the api key and provider error body do not appear in the browser response                                0.01s
+  ✓ a project with a completed generation reports has_content_plan true                                      0.02s
+  ✓ a project with only a failed generation reports has_content_plan false                                   0.02s
 
 
 
