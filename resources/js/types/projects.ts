@@ -13,6 +13,7 @@ export type Project = {
     status: ProjectStatus;
     due_date: string | null;
     brief: string | null;
+    has_content_plan: boolean;
 };
 
 export type ContentPlanOutlineItem = {
@@ -31,5 +32,6 @@ export type ContentPlan = {
 
 export type LatestGeneration = {
     id: number;
+    project_id: number;
     project_title: string;
 } & ContentPlan;

@@ -16,6 +16,7 @@ class ProjectController extends Controller
     public function index(Request $request): Response
     {
         $projects = $request->user()->projects()
+            ->with(['contentGenerations' => fn ($query) => $query->where('status', 'completed')->select('id', 'project_id')])
             ->latest()
             ->get()
             ->map(fn (Project $project): array => [
@@ -25,6 +26,7 @@ class ProjectController extends Controller
                 'status' => $project->status->label(),
                 'due_date' => $project->due_date?->toDateString(),
                 'brief' => $project->brief,
+                'has_content_plan' => $project->contentGenerations->isNotEmpty(),
             ])
             ->values();
 
@@ -39,6 +41,7 @@ class ProjectController extends Controller
             'projects' => $projects,
             'latestGeneration' => $latestGeneration === null ? null : [
                 'id' => $latestGeneration->id,
+                'project_id' => $latestGeneration->project_id,
                 'project_title' => $latestGeneration->project->title,
                 'suggested_title' => $latestGeneration->response['suggested_title'] ?? '',
                 'content_brief' => $latestGeneration->response['content_brief'] ?? '',

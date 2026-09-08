@@ -226,6 +226,17 @@ Copy `.env.example` to `.env` and adjust. Key variables:
 
 > **Security:** seeded credentials come from environment variables, never hardcoded. The `.test` TLD default is reserved and non-routable, so no production-credential can be committed. A unit test (`tests/Unit/SeederCredentialTest`) enforces this.
 
+### AI configuration
+
+The content-plan generation feature calls the OpenAI API from the Laravel backend. Set these values in `.env`:
+
+| Variable         | Purpose                                | Default |
+| ---------------- | -------------------------------------- | ------- |
+| `OPENAI_API_KEY` | Server-side OpenAI API key             | —       |
+| `OPENAI_MODEL`   | OpenAI model used for plan generation  | —       |
+
+The key is read through `config/services.php` and is never exposed to the browser. `tests/Unit/OpenAIConfigTest` enforces that application code uses `config()` rather than `env()` directly.
+
 ---
 
 ## Testing

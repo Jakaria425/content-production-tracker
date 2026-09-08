@@ -1,6 +1,6 @@
 # Work Log
 
-## 2026-09-06 — Focused feature tests for the Projects page
+## Focused feature tests for the Projects page
 
 Task: add an empty-state feature test for `/projects`, run the focused tests,
 then the full suite, then the type-check. Record every command and result.
@@ -137,7 +137,7 @@ No files were deleted.
 
 Start time  09:30 - 09/07/2026
 
-## Day 3 baseline verification
+## baseline verification
 
 php artisan test tests/Feature/ProjectsTest.php
 
@@ -181,7 +181,7 @@ copy .env.example .env  [// configure database ]
 php artisan key:generate
 
 
-## 2026-09-07 — Day 3 Step 4: OpenAI safe configuration
+## OpenAI safe configuration
 
 Task: add OPENAI_API_KEY and OPENAI_MODEL to .env.example and config/services.php.
 Application code must use config(), never env().
@@ -228,7 +228,7 @@ Application code must use config(), never env().
 - Third test skips until OpenAIService is created.
 
 
-## 2026-09-07 — Day 3 Step 5: ContentGeneration model, migration, factory
+## ContentGeneration model, migration, factory
 
 Task: create the content_generations table and model.
 
@@ -259,7 +259,7 @@ php artisan test --compact
 Result: 90 tests, 87 passed, 3 skipped, 1 risky.
 
 
-## 2026-09-07 — Day 3 Step 6: OpenAI service
+## OpenAI service
 
 Task: build app/Services/OpenAIService.php — one class, return-based errors.
 
@@ -301,7 +301,7 @@ The service satisfies every requirement from Step 6 with no extensions:
 - No retries, no queues, no streaming, no extra files.
 
 
-## 2026-09-07 — Day 3 Step 7: Generation endpoint and authorization
+## Generation endpoint and authorization
 
 Task: add an authenticated POST route that generates a plan for a project the
 user owns, saves one ContentGeneration record, and flashes a safe message.
@@ -374,7 +374,7 @@ user owns, saves one ContentGeneration record, and flashes a safe message.
 - Endpoint tests are deliberately deferred to Step 9.
 
 
-## 2026-09-07 — Day 3 Step 8: Generate button and latest plan display (Vue)
+## Generate button and latest plan display (Vue)
 
 Task: give the user an in-UI trigger for generation and a read-only view of the
 most recently saved successful plan, in TypeScript with no uses of `any`.
@@ -442,7 +442,7 @@ most recently saved successful plan, in TypeScript with no uses of `any`.
   `SAFE_FAILURE_MESSAGE`, so Step 6/7 guarantees were untouched.
 
 
-## 2026-09-07 — Day 3 diagnosis: why the button always failed
+## diagnosis: why the button always failed
 
 Symptom: every generation produced a failed row with `error_code =
 provider_error` and only the generic safe message in the UI.
@@ -490,3 +490,135 @@ curl.exe -L --fail -o C:\php-8.5.8\extras\ssl\cacert.pem https://curl.se/ca/cace
 
 Result: PASSED — 188,900-byte bundle; `php -r "echo ini_get('curl.cainfo')"`
 returns the new path.
+
+
+## AI feature tests — Step 9
+
+Task: add focused Pest tests for the content-generation model, the OpenAI service,
+the generation endpoint/authorization, and the Vue display contract, faking every
+provider response and never calling the real OpenAI API.
+
+### Test files created
+
+| File | Scope | Tests |
+|---|---|---|
+| `tests/Unit/ContentGenerationModelTest.php` | `ContentGeneration` model | 6 |
+| `tests/Unit/OpenAIServiceTest.php` | `OpenAIService::generate()` | 9 |
+| `tests/Feature/ContentGenerationTest.php` | Endpoint + authorization | 14 |
+| `tests/Feature/ContentPlanDisplayTest.php` | Vue Inertia prop contract | 3 |
+
+### Commands and results
+
+1. New AI-feature tests
+
+    ```bash
+    php artisan test tests/Unit/ContentGenerationModelTest.php tests/Unit/OpenAIServiceTest.php tests/Feature/ContentGenerationTest.php tests/Feature/ContentPlanDisplayTest.php --compact
+    ```
+
+    Result: PASSED — 32 tests, 32 passed.
+
+2. Full test suite
+
+    ```bash
+    php artisan test --compact
+    ```
+
+    Result: PASSED — 124 tests, 121 passed, 3 skipped, 0 failures, 482 assertions.
+
+3. PHP code style
+
+    ```bash
+    vendor\bin\pint --dirty --format agent
+    ```
+
+    Result: PASSED — no files required formatting.
+
+4. Static analysis
+
+    ```bash
+    vendor\bin\phpstan analyse --memory-limit=1024M
+    ```
+
+    Result: PASSED — 0 errors.
+
+5. TypeScript type-check
+
+    ```bash
+    NODE_OPTIONS=--max-old-space-size=4096 npm run type-check
+    ```
+
+    Result: PASSED — `vue-tsc --noEmit` clean.
+
+### Note on `composer run ci:check`
+
+`composer run ci:check` fails on this machine at the `npm run check` step
+(vite-plus frontend formatting) because the `tinypool` worker pool crashes with
+a Node.js memory error. The individual component checks (Pest, Pint, PHPStan,
+`npm run type-check`) all pass; the bundled script fails for environment/memory
+reasons before it reaches the PHP tests.
+
+### Detailed test output
+
+```text
+   PASS  Tests\Unit\ContentGenerationModelTest
+  ✓ it casts the response column as an array                                                                 0.28s  
+  ✓ it persists tracked fields                                                                               0.01s  
+  ✓ it belongs to its project                                                                                0.02s  
+  ✓ it factory default is a completed generation                                                             0.01s  
+  ✓ it factory failed state clears response data                                                             0.01s  
+  ✓ it deletes generations when the project is deleted                                                       0.01s  
+
+
+   PASS  Tests\Unit\OpenAIConfigTest
+  ✓ openai credentials come from environment via config, not hardcoded                                       0.01s  
+  ✓ services config reads openai values from environment                                                     0.01s  
+  ✓ application code does not call env for openai credentials                                                0.01s  
+
+   PASS  Tests\Unit\OpenAIServiceTest
+  ✓ it returns missing_configuration when the api key is empty                                               0.02s  
+  ✓ it returns missing_configuration when the model is empty                                                 0.01s  
+  ✓ it returns provider_error on a non-2xx response                                                          0.05s  
+  ✓ it returns provider_error on a connection failure                                                        0.01s  
+  ✓ it returns invalid_response when output text is not valid json                                           0.01s  
+  ✓ it returns invalid_response when the json misses a required key                                          0.01s  
+  ✓ it returns completed with parsed data and token usage                                                    0.01s  
+  ✓ it sends a strict json_schema format                                                                     0.01s  
+  ✓ it builds the prompt from allowed fields and excludes secrets                                            0.01s  
+                                                                  
+
+   PASS  Tests\Feature\Auth\PasswordResetTest
+  ✓ reset password link screen can be rendered                                                               0.02s  
+  ✓ reset password link can be requested                                                                     0.24s  
+  ✓ reset password screen can be rendered                                                                    0.23s  
+  ✓ password can be reset with valid token                                                                   0.23s  
+  ✓ password cannot be reset with invalid token                                                              0.22s  
+
+
+   PASS  Tests\Feature\ContentGenerationTest
+  ✓ a guest cannot generate a content plan                                                                   0.02s  
+  ✓ a user can generate a plan for their own project                                                         0.02s  
+  ✓ a user cannot generate a plan for another user project                                                   0.02s  
+  ✓ invalid project input prevents the provider request                                                      0.01s  
+  ✓ the outgoing request uses the configured model                                                           0.01s  
+  ✓ the outgoing prompt includes the allowed project data                                                    0.01s  
+  ✓ the outgoing prompt excludes unrelated user data and secrets                                             0.01s  
+  ✓ a successful structured response is validated and saved                                                  0.01s  
+  ✓ token usage is saved when present                                                                        0.01s  
+  ✓ a provider http failure saves a failed generation and shows a safe message                               0.01s  
+  ✓ malformed structured output saves a failed generation and shows a safe message                           0.02s  
+  ✓ the api key and provider error body do not appear in the browser response                                0.01s  
+  ✓ a project with a completed generation reports has_content_plan true                                      0.02s  
+  ✓ a project with only a failed generation reports has_content_plan false                                   0.02s  
+
+
+
+
+```
+
+### Summary
+
+- All four requested test areas have dedicated, passing coverage.
+- No real OpenAI API request is made by any test (`Http::preventStrayRequests()`
+  and `Http::fake()` guard every call).
+- Tests set their own `services.openai` config, so they do not skip when
+  `OPENAI_API_KEY` is absent from the environment.
