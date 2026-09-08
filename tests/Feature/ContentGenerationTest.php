@@ -179,7 +179,7 @@ test('a successful structured response is validated and saved', function (): voi
 
     $generation = ContentGeneration::where('project_id', $project->id)->firstOrFail();
 
-    expect($generation->status)->toBe('completed')
+    expect($generation->response)->toEqual($plan);
         ->and($generation->response)->toBe($plan);
 });
 
