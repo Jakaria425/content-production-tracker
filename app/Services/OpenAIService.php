@@ -86,31 +86,19 @@ class OpenAIService
             ];
         }
 
+        if (! $this->validateResponse($outputText)) {
+            return [
+                'status' => 'failed',
+                'prompt' => $prompt,
+                'data' => null,
+                'model' => $model,
+                'input_tokens' => null,
+                'output_tokens' => null,
+                'error_code' => 'invalid_response',
+            ];
+        }
+
         $data = json_decode($outputText, true);
-
-        if (! is_array($data)) {
-            return [
-                'status' => 'failed',
-                'prompt' => $prompt,
-                'data' => null,
-                'model' => $model,
-                'input_tokens' => null,
-                'output_tokens' => null,
-                'error_code' => 'invalid_response',
-            ];
-        }
-
-        if (! $this->validateResponse($data)) {
-            return [
-                'status' => 'failed',
-                'prompt' => $prompt,
-                'data' => null,
-                'model' => $model,
-                'input_tokens' => null,
-                'output_tokens' => null,
-                'error_code' => 'invalid_response',
-            ];
-        }
 
         return [
             'status' => 'completed',
@@ -188,12 +176,15 @@ class OpenAIService
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    private function validateResponse(array $data): bool
+    private function validateResponse(string $json): bool
     {
-        $required = [
+        $decoded = json_decode($json);
+
+        if (! is_object($decoded)) {
+            return false;
+        }
+
+        $allowed = [
             'suggested_title',
             'content_brief',
             'outline',
@@ -202,18 +193,67 @@ class OpenAIService
             'risks_or_missing_information',
         ];
 
-        foreach ($required as $key) {
-            if (! array_key_exists($key, $data)) {
+        $actual = array_keys(get_object_vars($decoded));
+        if (array_diff($actual, $allowed) !== []) {
+            return false;
+        }
+
+        if (! is_string($decoded->suggested_title ?? null) || $decoded->suggested_title === '') {
+            return false;
+        }
+
+        if (! is_string($decoded->content_brief ?? null) || $decoded->content_brief === '') {
+            return false;
+        }
+
+        if (! $this->validateOutline($decoded->outline ?? null)) {
+            return false;
+        }
+
+        foreach (['key_points', 'production_tasks', 'risks_or_missing_information'] as $field) {
+            if (! $this->validateStringList($decoded->$field ?? null)) {
                 return false;
             }
         }
 
-        if (! is_array($data['outline'])) {
+        return true;
+    }
+
+    private function validateOutline(mixed $value): bool
+    {
+        if (! is_array($value)) {
             return false;
         }
 
-        foreach ($data['outline'] as $item) {
-            if (! is_array($item) || ! array_key_exists('heading', $item) || ! array_key_exists('purpose', $item)) {
+        foreach ($value as $item) {
+            if (! is_object($item)) {
+                return false;
+            }
+
+            if (array_diff(array_keys(get_object_vars($item)), ['heading', 'purpose']) !== []) {
+                return false;
+            }
+
+            if (! is_string($item->heading ?? null) || $item->heading === '') {
+                return false;
+            }
+
+            if (! is_string($item->purpose ?? null) || $item->purpose === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function validateStringList(mixed $value): bool
+    {
+        if (! is_array($value)) {
+            return false;
+        }
+
+        foreach ($value as $item) {
+            if (! is_string($item) || $item === '') {
                 return false;
             }
         }

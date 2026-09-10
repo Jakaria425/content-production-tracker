@@ -98,6 +98,43 @@ it('returns invalid_response when the json misses a required key', function (): 
         ->and($result['error_code'])->toBe('invalid_response');
 });
 
+it('returns invalid_response for malformed schema: :key', function (array $overrides): void {
+    $project = Project::factory()->create(['brief' => 'A brief.']);
+
+    $plan = [
+        'suggested_title' => 'T',
+        'content_brief' => 'B',
+        'outline' => [['heading' => 'H', 'purpose' => 'P']],
+        'key_points' => ['K'],
+        'production_tasks' => ['T'],
+        'risks_or_missing_information' => ['R'],
+    ];
+    $plan = array_merge($plan, $overrides);
+
+    Http::fake([
+        'https://api.openai.com/v1/responses' => Http::response(
+            ['output' => [['content' => [['type' => 'output_text', 'text' => json_encode($plan)]]]]],
+            200,
+        ),
+    ]);
+
+    $result = app(OpenAIService::class)->generate($project);
+
+    expect($result['status'])->toBe('failed')
+        ->and($result['error_code'])->toBe('invalid_response')
+        ->and($result['data'])->toBeNull();
+})->with([
+    'numeric suggested_title' => [['suggested_title' => 123]],
+    'boolean content_brief' => [['content_brief' => true]],
+    'outline as object' => [['outline' => (object) []]],
+    'key_points as string' => [['key_points' => 'not an array']],
+    'non-string key_points entry' => [['key_points' => [42]]],
+    'production_tasks as object' => [['production_tasks' => (object) []]],
+    'risks as boolean' => [['risks_or_missing_information' => true]],
+    'outline heading as number' => [['outline' => [['heading' => 99, 'purpose' => 'P']]]],
+    'unexpected top-level key' => [['extra' => 'x']],
+]);
+
 it('returns completed with parsed data and token usage', function (): void {
     $project = Project::factory()->create(['brief' => 'A brief.']);
     $plan = [

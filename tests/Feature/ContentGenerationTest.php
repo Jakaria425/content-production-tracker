@@ -221,30 +221,146 @@ test('a provider http failure saves a failed generation and shows a safe message
     ]);
 });
 
-test('malformed structured output saves a failed generation and shows a safe message', function (): void {
+it('rejects a malformed response: :key', function (array $planOverrides): void {
     $user = User::factory()->create();
     $project = Project::factory()->for($user)->create(['brief' => 'A brief.']);
 
-    $broken = ['suggested_title' => 'X', 'content_brief' => 'Y', 'outline' => [], 'key_points' => [], 'production_tasks' => []];
+    $plan = contentPlanPayload();
+
+    foreach ($planOverrides as $field => $value) {
+        if ($value === '__UNSET__') {
+            unset($plan[$field]);
+        } else {
+            $plan[$field] = $value;
+        }
+    }
 
     Http::fake([
         'https://api.openai.com/v1/responses' => Http::response(
-            ['output' => [['content' => [['type' => 'output_text', 'text' => json_encode($broken)]]]]],
-            200,
+            openAIResponsesStub($plan), 200,
         ),
     ]);
 
-    $this->actingAs($user)
-        ->post(route('projects.generations.store', $project))
-        ->assertRedirect()
+    $response = $this->actingAs($user)
+        ->post(route('projects.generations.store', $project));
+
+    $response->assertRedirect()
         ->assertInertiaFlash('toast', ['type' => 'error', 'message' => SAFE_MESSAGE]);
 
-    $this->assertDatabaseHas('content_generations', [
-        'project_id' => $project->id,
-        'status' => 'failed',
-        'error_code' => 'invalid_response',
-    ]);
-});
+    $generation = ContentGeneration::where('project_id', $project->id)->firstOrFail();
+
+    expect($generation->status)->toBe('failed')
+        ->and($generation->response)->toBeNull()
+        ->and($generation->error_code)->toBe('invalid_response')
+        ->and($generation->prompt)->not->toBeEmpty()
+        ->and($generation->model)->toBe(TEST_MODEL);
+
+    $content = $response->getContent();
+    expect($content)->not->toContain(TEST_API_KEY);
+})->with([
+    // ── Missing required fields ──────────────────────────
+    'missing suggested_title' => [
+        ['suggested_title' => '__UNSET__'],
+    ],
+    'missing content_brief' => [
+        ['content_brief' => '__UNSET__'],
+    ],
+    'missing outline' => [
+        ['outline' => '__UNSET__'],
+    ],
+    'missing key_points' => [
+        ['key_points' => '__UNSET__'],
+    ],
+    'missing production_tasks' => [
+        ['production_tasks' => '__UNSET__'],
+    ],
+    'missing risks_or_missing_information' => [
+        ['risks_or_missing_information' => '__UNSET__'],
+    ],
+
+    // ── Wrong scalar types for string fields ─────────────
+    'numeric suggested_title' => [
+        ['suggested_title' => 42],
+    ],
+    'boolean suggested_title' => [
+        ['suggested_title' => true],
+    ],
+    'empty string suggested_title' => [
+        ['suggested_title' => ''],
+    ],
+    'numeric content_brief' => [
+        ['content_brief' => 42],
+    ],
+    'boolean content_brief' => [
+        ['content_brief' => true],
+    ],
+    'empty string content_brief' => [
+        ['content_brief' => ''],
+    ],
+
+    // ── Wrong list element types ─────────────────────────
+    'numeric key_points entries' => [
+        ['key_points' => [1, 2, 3]],
+    ],
+    'boolean key_points entries' => [
+        ['key_points' => [true, false]],
+    ],
+    'empty string key_points entries' => [
+        ['key_points' => ['']],
+    ],
+    'numeric production_tasks entries' => [
+        ['production_tasks' => [1, 2, 3]],
+    ],
+    'boolean production_tasks entries' => [
+        ['production_tasks' => [true, false]],
+    ],
+    'empty string production_tasks entries' => [
+        ['production_tasks' => ['']],
+    ],
+    'numeric risks entries' => [
+        ['risks_or_missing_information' => [1, 2, 3]],
+    ],
+    'boolean risks entries' => [
+        ['risks_or_missing_information' => [true, false]],
+    ],
+    'empty string risks entries' => [
+        ['risks_or_missing_information' => ['']],
+    ],
+    'numeric outline heading' => [
+        ['outline' => [['heading' => 42, 'purpose' => 'Hook']]],
+    ],
+    'boolean outline purpose' => [
+        ['outline' => [['heading' => 'Intro', 'purpose' => true]]],
+    ],
+    'empty string outline heading' => [
+        ['outline' => [['heading' => '', 'purpose' => 'Hook']]],
+    ],
+    'outline item as string' => [
+        ['outline' => ['not an object']],
+    ],
+    'outline item as integer' => [
+        ['outline' => [42]],
+    ],
+
+    // ── Object-shaped lists (JSON objects not arrays) ────
+    'outline as object' => [
+        ['outline' => (object) []],
+    ],
+    'key_points as object' => [
+        ['key_points' => (object) []],
+    ],
+    'production_tasks as object' => [
+        ['production_tasks' => (object) []],
+    ],
+    'risks as object' => [
+        ['risks_or_missing_information' => (object) []],
+    ],
+
+    // ── Unexpected top-level properties ──────────────────
+    'unexpected extra property' => [
+        ['unexpected_field' => 'should be rejected'],
+    ],
+]);
 
 test('the api key and provider error body do not appear in the browser response', function (): void {
     $user = User::factory()->create();

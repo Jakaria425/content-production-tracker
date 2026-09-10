@@ -24,10 +24,10 @@ defineOptions({
     },
 });
 
-const isGenerating = ref(false);
+const generatingProjectId = ref<number | null>(null);
 
 function generateContentPlan(project: Project): void {
-    if (isGenerating.value) {
+    if (generatingProjectId.value !== null) {
         return;
     }
 
@@ -36,10 +36,10 @@ function generateContentPlan(project: Project): void {
         {},
         {
             onStart: () => {
-                isGenerating.value = true;
+                generatingProjectId.value = project.id;
             },
             onFinish: () => {
-                isGenerating.value = false;
+                generatingProjectId.value = null;
             },
         },
     );
@@ -87,11 +87,11 @@ function generateContentPlan(project: Project): void {
                             v-if="project.brief && !project.has_content_plan"
                             type="button"
                             size="sm"
-                            :disabled="isGenerating"
+                            :disabled="generatingProjectId === project.id"
                             @click="generateContentPlan(project)"
                         >
                             {{
-                                isGenerating
+                                generatingProjectId === project.id
                                     ? 'Generating…'
                                     : 'Generate content plan'
                             }}

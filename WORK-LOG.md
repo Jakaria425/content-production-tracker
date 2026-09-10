@@ -603,3 +603,32 @@ reasons before it reaches the PHP tests.
   and `Http::fake()` guard every call).
 - Tests set their own `services.openai` config, so they do not skip when
   `OPENAI_API_KEY` is absent from the environment.
+
+
+
+
+  ### ---------DAY-3 carry-over-------
+
+* OpenAIServiceTest
+
+  ✓ it returns missing_configuration when the api key is empty                                                                                                                                    0.22s  
+  ✓ it returns missing_configuration when the model is empty                                                                                                                                      0.01s  
+  ✓ it returns provider_error on a non-2xx response                                                                                                                                               0.03s  
+  ✓ it returns provider_error on a connection failure                                                                                                                                             0.01s  
+  ✓ it returns invalid_response when output text is not valid json                                                                                                                                0.01s  
+  ✓ it returns invalid_response when the json misses a required key                                                                                                                               0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "numeric suggested_title"                                                                                                 0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "boolean content_brief"                                                                                                   0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "outline as object"                                                                                                       0.02s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "key_points as string"                                                                                                    0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "non-string key_points entry"                                                                                             0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "production_tasks as object"                                                                                              0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "risks as boolean"                                                                                                        0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "outline heading as number"                                                                                               0.01s  
+  ✓ it returns invalid_response for malformed schema: :key with dataset "unexpected top-level key"                                                                                                0.01s  
+  ✓ it returns completed with parsed data and token usage                                                                                                                                         0.01s  
+  ✓ it sends a strict json_schema format                                                                                                                                                          0.01s  
+  ✓ it builds the prompt from allowed fields and excludes secret
+
+  Tests:    18 passed (52 assertions)
+  Duration: 0.62s
