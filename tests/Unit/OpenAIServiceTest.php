@@ -15,6 +15,36 @@ beforeEach(function (): void {
     Http::preventStrayRequests();
 });
 
+/**
+ * @param  array<string, mixed>|null  $usage
+ * @return array<string, mixed>
+ */
+function responsesApiTextStub(string $text, ?array $usage = ['input_tokens' => 111, 'output_tokens' => 222]): array
+{
+    return [
+        'id' => 'resp_unit',
+        'object' => 'response',
+        'status' => 'completed',
+        'output' => [
+            [
+                'type' => 'reasoning',
+                'id' => 'rs_unit',
+                'summary' => [],
+            ],
+            [
+                'type' => 'message',
+                'id' => 'msg_unit',
+                'role' => 'assistant',
+                'status' => 'completed',
+                'content' => [
+                    ['type' => 'output_text', 'text' => $text, 'annotations' => []],
+                ],
+            ],
+        ],
+        'usage' => $usage,
+    ];
+}
+
 it('returns missing_configuration when the api key is empty', function (): void {
     config(['services.openai.api_key' => '']);
     $project = Project::factory()->create(['brief' => 'A brief.']);
@@ -69,10 +99,7 @@ it('returns provider_error on a connection failure', function (): void {
 it('returns invalid_response when output text is not valid json', function (): void {
     $project = Project::factory()->create(['brief' => 'A brief.']);
     Http::fake([
-        'https://api.openai.com/v1/responses' => Http::response(
-            ['output' => [['content' => [['type' => 'output_text', 'text' => 'not json']]]]],
-            200,
-        ),
+        'https://api.openai.com/v1/responses' => Http::response(responsesApiTextStub('not json'), 200),
     ]);
 
     $result = app(OpenAIService::class)->generate($project);
@@ -86,10 +113,7 @@ it('returns invalid_response when the json misses a required key', function (): 
     $broken = ['suggested_title' => 'X', 'content_brief' => 'Y', 'outline' => [], 'key_points' => [], 'production_tasks' => []];
 
     Http::fake([
-        'https://api.openai.com/v1/responses' => Http::response(
-            ['output' => [['content' => [['type' => 'output_text', 'text' => json_encode($broken)]]]]],
-            200,
-        ),
+        'https://api.openai.com/v1/responses' => Http::response(responsesApiTextStub(json_encode($broken)), 200),
     ]);
 
     $result = app(OpenAIService::class)->generate($project);
@@ -112,10 +136,7 @@ it('returns invalid_response for malformed schema: :key', function (array $overr
     $plan = array_merge($plan, $overrides);
 
     Http::fake([
-        'https://api.openai.com/v1/responses' => Http::response(
-            ['output' => [['content' => [['type' => 'output_text', 'text' => json_encode($plan)]]]]],
-            200,
-        ),
+        'https://api.openai.com/v1/responses' => Http::response(responsesApiTextStub(json_encode($plan)), 200),
     ]);
 
     $result = app(OpenAIService::class)->generate($project);
@@ -135,6 +156,91 @@ it('returns invalid_response for malformed schema: :key', function (array $overr
     'unexpected top-level key' => [['extra' => 'x']],
 ]);
 
+it('returns invalid_response when the output has no assistant message', function (): void {
+    $project = Project::factory()->create(['brief' => 'A brief.']);
+
+    Http::fake([
+        'https://api.openai.com/v1/responses' => Http::response([
+            'id' => 'resp_unit',
+            'object' => 'response',
+            'status' => 'completed',
+            'output' => [
+                ['type' => 'reasoning', 'id' => 'rs_unit', 'summary' => []],
+            ],
+            'usage' => ['input_tokens' => 111, 'output_tokens' => 222],
+        ], 200),
+    ]);
+
+    $result = app(OpenAIService::class)->generate($project);
+
+    expect($result['status'])->toBe('failed')
+        ->and($result['error_code'])->toBe('invalid_response')
+        ->and($result['data'])->toBeNull();
+});
+
+it('returns invalid_response when the assistant message contains a refusal', function (): void {
+    $project = Project::factory()->create(['brief' => 'A brief.']);
+
+    Http::fake([
+        'https://api.openai.com/v1/responses' => Http::response([
+            'id' => 'resp_unit',
+            'object' => 'response',
+            'status' => 'completed',
+            'output' => [
+                ['type' => 'reasoning', 'id' => 'rs_unit', 'summary' => []],
+                [
+                    'type' => 'message',
+                    'id' => 'msg_unit',
+                    'role' => 'assistant',
+                    'status' => 'completed',
+                    'content' => [
+                        ['type' => 'refusal', 'refusal' => 'I cannot help with that request.'],
+                    ],
+                ],
+            ],
+            'usage' => ['input_tokens' => 111, 'output_tokens' => 222],
+        ], 200),
+    ]);
+
+    $result = app(OpenAIService::class)->generate($project);
+
+    expect($result['status'])->toBe('failed')
+        ->and($result['error_code'])->toBe('invalid_response')
+        ->and($result['data'])->toBeNull();
+});
+
+it('returns invalid_response when the response status is incomplete', function (): void {
+    $project = Project::factory()->create(['brief' => 'A brief.']);
+
+    Http::fake([
+        'https://api.openai.com/v1/responses' => Http::response([
+            'id' => 'resp_unit',
+            'object' => 'response',
+            'status' => 'incomplete',
+            'incomplete_details' => ['reason' => 'max_output_tokens'],
+            'output' => [
+                ['type' => 'reasoning', 'id' => 'rs_unit', 'summary' => []],
+                [
+                    'type' => 'message',
+                    'id' => 'msg_unit',
+                    'role' => 'assistant',
+                    'status' => 'incomplete',
+                    'content' => [
+                        ['type' => 'output_text', 'text' => '{"suggested_title":"tru', 'annotations' => []],
+                    ],
+                ],
+            ],
+            'usage' => ['input_tokens' => 111, 'output_tokens' => 222],
+        ], 200),
+    ]);
+
+    $result = app(OpenAIService::class)->generate($project);
+
+    expect($result['status'])->toBe('failed')
+        ->and($result['error_code'])->toBe('invalid_response')
+        ->and($result['data'])->toBeNull();
+});
+
 it('returns completed with parsed data and token usage', function (): void {
     $project = Project::factory()->create(['brief' => 'A brief.']);
     $plan = [
@@ -147,12 +253,7 @@ it('returns completed with parsed data and token usage', function (): void {
     ];
 
     Http::fake([
-        'https://api.openai.com/v1/responses' => Http::response([
-            'output' => [
-                ['content' => [['type' => 'output_text', 'text' => json_encode($plan)]]],
-            ],
-            'usage' => ['input_tokens' => 111, 'output_tokens' => 222],
-        ], 200),
+        'https://api.openai.com/v1/responses' => Http::response(responsesApiTextStub(json_encode($plan)), 200),
     ]);
 
     $result = app(OpenAIService::class)->generate($project);
@@ -168,18 +269,14 @@ it('returns completed with parsed data and token usage', function (): void {
 it('sends a strict json_schema format', function (): void {
     $project = Project::factory()->create(['brief' => 'A brief.']);
     Http::fake([
-        'https://api.openai.com/v1/responses' => Http::response([
-            'output' => [
-                ['content' => [['type' => 'output_text', 'text' => json_encode([
-                    'suggested_title' => 'T',
-                    'content_brief' => 'B',
-                    'outline' => [['heading' => 'H', 'purpose' => 'P']],
-                    'key_points' => ['K'],
-                    'production_tasks' => ['T'],
-                    'risks_or_missing_information' => ['R'],
-                ])]]],
-            ],
-        ], 200),
+        'https://api.openai.com/v1/responses' => Http::response(responsesApiTextStub(json_encode([
+            'suggested_title' => 'T',
+            'content_brief' => 'B',
+            'outline' => [['heading' => 'H', 'purpose' => 'P']],
+            'key_points' => ['K'],
+            'production_tasks' => ['T'],
+            'risks_or_missing_information' => ['R'],
+        ])), 200),
     ]);
 
     app(OpenAIService::class)->generate($project);
@@ -200,18 +297,14 @@ it('builds the prompt from allowed fields and excludes secrets', function (): vo
         'notes' => 'Include screenshots',
     ]);
     Http::fake([
-        'https://api.openai.com/v1/responses' => Http::response([
-            'output' => [
-                ['content' => [['type' => 'output_text', 'text' => json_encode([
-                    'suggested_title' => 'T',
-                    'content_brief' => 'B',
-                    'outline' => [['heading' => 'H', 'purpose' => 'P']],
-                    'key_points' => ['K'],
-                    'production_tasks' => ['T'],
-                    'risks_or_missing_information' => ['R'],
-                ])]]],
-            ],
-        ], 200),
+        'https://api.openai.com/v1/responses' => Http::response(responsesApiTextStub(json_encode([
+            'suggested_title' => 'T',
+            'content_brief' => 'B',
+            'outline' => [['heading' => 'H', 'purpose' => 'P']],
+            'key_points' => ['K'],
+            'production_tasks' => ['T'],
+            'risks_or_missing_information' => ['R'],
+        ])), 200),
     ]);
 
     app(OpenAIService::class)->generate($project);

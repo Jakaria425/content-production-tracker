@@ -14,6 +14,7 @@ export type Project = {
     due_date: string | null;
     brief: string | null;
     has_content_plan: boolean;
+    content_plan: ContentPlan | null;
 };
 
 export type ContentPlanOutlineItem = {
@@ -29,9 +30,3 @@ export type ContentPlan = {
     production_tasks: string[];
     risks_or_missing_information: string[];
 };
-
-export type LatestGeneration = {
-    id: number;
-    project_id: number;
-    project_title: string;
-} & ContentPlan;

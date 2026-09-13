@@ -604,31 +604,93 @@ reasons before it reaches the PHP tests.
 - Tests set their own `services.openai` config, so they do not skip when
   `OPENAI_API_KEY` is absent from the environment.
 
+    ### ---------DAY-3 carry-over-------
 
+## JAK-D3-001 — Fix: malformed responses saved as completed
 
+**Root cause:** `OpenAIService::validateResponse()` checked only key presence and `is_array()`, never field types. JSON objects `{}` decoded to `[]` via `json_decode(..., true)`, making them indistinguishable from real arrays.
 
-  ### ---------DAY-3 carry-over-------
+### Reproduction (reviewer findings)
 
-* OpenAIServiceTest
+- Numeric `suggested_title` and boolean `content_brief` accepted as valid.
+- String instead of `key_points` list accepted.
+- Numeric `production_tasks` entries accepted.
+- Boolean/numeric outline `heading`/`purpose` accepted.
+- Empty JSON object `{}` as outline accepted (decoded to `[]`).
 
-  ✓ it returns missing_configuration when the api key is empty                                                                                                                                    0.22s  
-  ✓ it returns missing_configuration when the model is empty                                                                                                                                      0.01s  
-  ✓ it returns provider_error on a non-2xx response                                                                                                                                               0.03s  
-  ✓ it returns provider_error on a connection failure                                                                                                                                             0.01s  
-  ✓ it returns invalid_response when output text is not valid json                                                                                                                                0.01s  
-  ✓ it returns invalid_response when the json misses a required key                                                                                                                               0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "numeric suggested_title"                                                                                                 0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "boolean content_brief"                                                                                                   0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "outline as object"                                                                                                       0.02s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "key_points as string"                                                                                                    0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "non-string key_points entry"                                                                                             0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "production_tasks as object"                                                                                              0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "risks as boolean"                                                                                                        0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "outline heading as number"                                                                                               0.01s  
-  ✓ it returns invalid_response for malformed schema: :key with dataset "unexpected top-level key"                                                                                                0.01s  
-  ✓ it returns completed with parsed data and token usage                                                                                                                                         0.01s  
-  ✓ it sends a strict json_schema format                                                                                                                                                          0.01s  
-  ✓ it builds the prompt from allowed fields and excludes secret
+### Changes made
 
-  Tests:    18 passed (52 assertions)
-  Duration: 0.62s
+| Type | File                                      | Detail                                                                                                                                                                                                                                                                                                                             |
+| ---- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EDIT | `app/Services/OpenAIService.php`          | Rewrote `validateResponse()` to accept raw JSON string, parse with `json_decode()` (no `true`) so `{}` stays `stdClass` (rejected) and `[]` stays array (accepted). Enforces non-empty strings for scalars, arrays of non-empty strings for lists, outline objects with string heading/purpose, rejects unexpected top-level keys. |
+| EDIT | `app/Services/OpenAIService.php`          | `generate()` now validates the raw JSON string before associative decode; `data` is only produced after validation passes.                                                                                                                                                                                                         |
+| EDIT | `tests/Feature/ContentGenerationTest.php` | Replaced single malformed test with one parameterized test (`->with([...])`) covering 31 dataset cases: missing required fields, wrong scalar types, wrong list element types, object-shaped lists, empty objects, unexpected properties.                                                                                          |
+| EDIT | `tests/Unit/OpenAIServiceTest.php`        | Added parameterized unit test with 9 dataset cases for malformed schema validation.                                                                                                                                                                                                                                                |
+
+### Commands and results
+
+```bash
+php artisan test --filter="ContentGenerationTest" --compact
+```
+
+Result: PASSED — 44 tests, 44 passed, 327 assertions.
+
+```bash
+php artisan test --filter="OpenAIServiceTest" --compact
+```
+
+Result: PASSED — 18 tests, 18 passed, 52 assertions.
+
+```bash
+vendor\bin\pint --dirty --format agent
+```
+
+Result: PASSED — no files required formatting.
+
+### Verification
+
+- Every malformed response now saves `status=failed`, `response=null`, `error_code=invalid_response`.
+- Valid responses still save `status=completed` with parsed data and token usage.
+- Safe toast message shown; no raw provider details leaked.
+
+## JAK-D3-002 — Fix: valid reasoning-first output rejected
+
+**Severity:** Medium  
+**Root cause:** `OpenAIService::generate()` read `$response->json('output.0.content.0.text')` — a fixed array position. The OpenAI Responses API can emit a `reasoning` item before the assistant `message` item, so `output[0]` has no `content` key and extraction returns null → `failed`/`invalid_response` despite a valid message at `output[1]`.
+
+### Changes made
+
+| Type | File                                      | Detail                                                                                                                                                                                                                                                                                          |
+| ---- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EDIT | `app/Services/OpenAIService.php`          | Replaced fixed `output.0.content.0.text` read with `extractOutputText()` — iterates `output` array, finds items where `type === 'message'`, then `content` items where `type === 'output_text'`, concatenates text parts. Skips `reasoning`/`web_search_call`/`function_call`/etc. generically. |
+| EDIT | `app/Services/OpenAIService.php`          | Added response-level `status` check: non-`completed` (e.g. `incomplete`, `failed`) → `invalid_response` early, before extraction.                                                                                                                                                               |
+| EDIT | `tests/Feature/ContentGenerationTest.php` | Updated `openAIResponsesStub()` to realistic Responses API envelope: `status`, `id`, `object`, reasoning item first, then typed `message` item with `output_text`. All existing tests now exercise reasoning-first extraction implicitly.                                                       |
+| EDIT | `tests/Feature/ContentGenerationTest.php` | Added regression test: reasoning item first → assistant message with valid plan → asserts `status=completed`, response equals plan, token usage saved.                                                                                                                                          |
+| EDIT | `tests/Unit/OpenAIServiceTest.php`        | Added `responsesApiTextStub()` helper with realistic reasoning-first envelope; updated 6 existing test stubs to use it so they test their intended paths (validation, not extraction failure).                                                                                                  |
+| EDIT | `tests/Unit/OpenAIServiceTest.php`        | Added 3 failure-mode tests: output has no assistant message → `invalid_response`; assistant message contains refusal → `invalid_response`; response status is `incomplete` → `invalid_response`.                                                                                                |
+
+### Commands and results
+
+```bash
+php artisan test --filter="ContentGenerationTest" --compact
+```
+
+Result: PASSED — 45 tests, 45 passed, 332 assertions.
+
+```bash
+php artisan test --filter="OpenAIServiceTest" --compact
+```
+
+Result: PASSED — 21 tests, 21 passed, 61 assertions.
+
+```bash
+vendor\bin\pint --dirty --format agent
+```
+
+Result: PASSED.
+
+### Verification
+
+- Responses API envelope with reasoning-first → extraction finds the assistant message → plan validated and saved as `completed`.
+- Refusal-only message, no message, or incomplete status → all safely return `invalid_response` without leaking provider details.
+- All existing malformed-schema tests (31 dataset cases) still pass with the new realistic stubs.

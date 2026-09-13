@@ -6,11 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { index } from '@/routes/projects';
 import { store as generatePlan } from '@/routes/projects/generations';
-import type { LatestGeneration, Project } from '@/types';
+import type { Project } from '@/types';
 
 defineProps<{
     projects: Project[];
-    latestGeneration: LatestGeneration | null;
 }>();
 
 defineOptions({
@@ -104,29 +103,26 @@ function generateContentPlan(project: Project): void {
                 </div>
 
                 <section
-                    v-if="
-                        latestGeneration &&
-                        latestGeneration.project_id === project.id
-                    "
+                    v-if="project.content_plan"
                     class="space-y-5 rounded-lg border p-6"
                 >
                     <Heading
                         variant="small"
                         title="Content plan"
-                        :description="`Generated for “${latestGeneration.project_title}”`"
+                        :description="`Generated for ${project.title}`"
                     />
 
                     <div>
                         <h3 class="font-medium">Suggested title</h3>
                         <p class="text-muted-foreground text-sm">
-                            {{ latestGeneration.suggested_title }}
+                            {{ project.content_plan.suggested_title }}
                         </p>
                     </div>
 
                     <div>
                         <h3 class="font-medium">Content brief</h3>
                         <p class="text-muted-foreground text-sm">
-                            {{ latestGeneration.content_brief }}
+                            {{ project.content_plan.content_brief }}
                         </p>
                     </div>
 
@@ -136,9 +132,8 @@ function generateContentPlan(project: Project): void {
                             class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
                         >
                             <li
-                                v-for="(
-                                    item, outlineIndex
-                                ) in latestGeneration.outline"
+                                v-for="(item, outlineIndex) in project
+                                    .content_plan.outline"
                                 :key="outlineIndex"
                             >
                                 <span class="text-foreground font-medium">{{
@@ -155,9 +150,8 @@ function generateContentPlan(project: Project): void {
                             class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
                         >
                             <li
-                                v-for="(
-                                    keyPoint, keyPointIndex
-                                ) in latestGeneration.key_points"
+                                v-for="(keyPoint, keyPointIndex) in project
+                                    .content_plan.key_points"
                                 :key="keyPointIndex"
                             >
                                 {{ keyPoint }}
@@ -171,9 +165,8 @@ function generateContentPlan(project: Project): void {
                             class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
                         >
                             <li
-                                v-for="(
-                                    task, taskIndex
-                                ) in latestGeneration.production_tasks"
+                                v-for="(task, taskIndex) in project.content_plan
+                                    .production_tasks"
                                 :key="taskIndex"
                             >
                                 {{ task }}
@@ -189,9 +182,8 @@ function generateContentPlan(project: Project): void {
                             class="text-muted-foreground list-disc space-y-1 pl-5 text-sm"
                         >
                             <li
-                                v-for="(
-                                    risk, riskIndex
-                                ) in latestGeneration.risks_or_missing_information"
+                                v-for="(risk, riskIndex) in project.content_plan
+                                    .risks_or_missing_information"
                                 :key="riskIndex"
                             >
                                 {{ risk }}

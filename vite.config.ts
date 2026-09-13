@@ -9,6 +9,7 @@ import { defineConfig, lazyPlugins } from 'vite-plus';
 export default defineConfig({
     plugins: lazyPlugins(() => [
         laravel({
+            buildDirectory: 'build',
             input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
             fonts: [
@@ -31,6 +32,11 @@ export default defineConfig({
             formVariants: true,
         }),
     ]),
+    resolve: {
+        alias: {
+            '@': '/resources/js',
+        },
+    },
     server: {
         watch: {
             ignored: [

@@ -72,9 +72,23 @@ class OpenAIService
             ];
         }
 
-        $outputText = $response->json('output.0.content.0.text');
+        $status = $response->json('status');
 
-        if (! is_string($outputText) || empty($outputText)) {
+        if (is_string($status) && $status !== 'completed') {
+            return [
+                'status' => 'failed',
+                'prompt' => $prompt,
+                'data' => null,
+                'model' => $model,
+                'input_tokens' => null,
+                'output_tokens' => null,
+                'error_code' => 'invalid_response',
+            ];
+        }
+
+        $outputText = $this->extractOutputText($response->json('output'));
+
+        if ($outputText === null) {
             return [
                 'status' => 'failed',
                 'prompt' => $prompt,
@@ -174,6 +188,50 @@ class OpenAIService
             ],
             'additionalProperties' => false,
         ];
+    }
+
+    /**
+     * Locate the assistant output text by item type, skipping reasoning items.
+     *
+     * @param  array<int, mixed>|null  $output
+     */
+    private function extractOutputText(mixed $output): ?string
+    {
+        if (! is_array($output)) {
+            return null;
+        }
+
+        foreach ($output as $item) {
+            if (! is_array($item) || ($item['type'] ?? null) !== 'message') {
+                continue;
+            }
+
+            $content = $item['content'] ?? null;
+
+            if (! is_array($content)) {
+                continue;
+            }
+
+            $text = '';
+
+            foreach ($content as $contentItem) {
+                if (! is_array($contentItem) || ($contentItem['type'] ?? null) !== 'output_text') {
+                    continue;
+                }
+
+                $contentItemText = $contentItem['text'] ?? null;
+
+                if (is_string($contentItemText) && $contentItemText !== '') {
+                    $text .= $contentItemText;
+                }
+            }
+
+            if ($text !== '') {
+                return $text;
+            }
+        }
+
+        return null;
     }
 
     private function validateResponse(string $json): bool

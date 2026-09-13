@@ -25,6 +25,10 @@ class ProjectContentPlanController extends Controller
             return $this->failWithoutGeneration();
         }
 
+        if ($project->contentGenerations()->where('status', 'completed')->exists()) {
+            return $this->failWithoutGeneration();
+        }
+
         $result = $this->openAIService->generate($project);
 
         ContentGeneration::create([

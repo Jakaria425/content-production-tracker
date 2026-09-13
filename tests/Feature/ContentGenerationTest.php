@@ -45,8 +45,24 @@ function contentPlanPayload(): array
 function openAIResponsesStub(array $plan, ?array $usage = ['input_tokens' => 111, 'output_tokens' => 222]): array
 {
     return [
+        'id' => 'resp_test',
+        'object' => 'response',
+        'status' => 'completed',
         'output' => [
-            ['content' => [['type' => 'output_text', 'text' => json_encode($plan)]]],
+            [
+                'type' => 'reasoning',
+                'id' => 'rs_test',
+                'summary' => [],
+            ],
+            [
+                'type' => 'message',
+                'id' => 'msg_test',
+                'role' => 'assistant',
+                'status' => 'completed',
+                'content' => [
+                    ['type' => 'output_text', 'text' => json_encode($plan), 'annotations' => []],
+                ],
+            ],
         ],
         'usage' => $usage,
     ];
@@ -83,6 +99,20 @@ test('a user can generate a plan for their own project', function (): void {
         'project_id' => $project->id,
         'status' => 'completed',
     ]);
+});
+
+test('the server prevents duplicate generation for a project that already has a completed plan', function (): void {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create(['brief' => 'A brief.']);
+    ContentGeneration::factory()->for($project)->create(['status' => 'completed']);
+
+    $this->actingAs($user)
+        ->post(route('projects.generations.store', $project))
+        ->assertRedirect()
+        ->assertInertiaFlash('toast', ['type' => 'error', 'message' => SAFE_MESSAGE]);
+
+    expect(ContentGeneration::where('project_id', $project->id)->count())->toBe(1);
+    Http::assertNothingSent();
 });
 
 test('a user cannot generate a plan for another user project', function (): void {
@@ -181,6 +211,47 @@ test('a successful structured response is validated and saved', function (): voi
 
     expect($generation->status)->toBe('completed')
         ->and($generation->response)->toEqual($plan);
+});
+
+test('a response with a reasoning item before the assistant message saves the validated plan and usage', function (): void {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create(['brief' => 'A brief.']);
+    $plan = contentPlanPayload();
+
+    Http::fake([
+        'https://api.openai.com/v1/responses' => Http::response([
+            'id' => 'resp_regression',
+            'object' => 'response',
+            'status' => 'completed',
+            'output' => [
+                [
+                    'type' => 'reasoning',
+                    'id' => 'rs_regression',
+                    'summary' => [['type' => 'summary_text', 'text' => 'Thought about the project brief.']],
+                ],
+                [
+                    'type' => 'message',
+                    'id' => 'msg_regression',
+                    'role' => 'assistant',
+                    'status' => 'completed',
+                    'content' => [
+                        ['type' => 'output_text', 'text' => json_encode($plan), 'annotations' => []],
+                    ],
+                ],
+            ],
+            'usage' => ['input_tokens' => 111, 'output_tokens' => 222],
+        ], 200),
+    ]);
+
+    $this->actingAs($user)->post(route('projects.generations.store', $project));
+
+    $generation = ContentGeneration::where('project_id', $project->id)->firstOrFail();
+
+    expect($generation->status)->toBe('completed')
+        ->and($generation->response)->toEqual($plan)
+        ->and($generation->input_tokens)->toBe(111)
+        ->and($generation->output_tokens)->toBe(222)
+        ->and($generation->error_code)->toBeNull();
 });
 
 test('token usage is saved when present', function (): void {
